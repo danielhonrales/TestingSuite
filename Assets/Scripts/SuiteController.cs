@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,6 +18,7 @@ public class SuiteController : MonoBehaviour
     public int participantNumber;
     public int trialNumber;
     public List<TrialInfo> trialSet;
+    public bool autoPlayOnNext;
 
     [Space(10)]
     [Header("References")]
@@ -99,7 +101,7 @@ public class SuiteController : MonoBehaviour
         communicationController.SendMessageToPi(currentTrial.GetPiMessage());
         communicationController.SendMessageToResponseTool(GetMessageForTool(
             "trialstart",
-            new List<string>() { participantNumber.ToString(), trialNumber.ToString(), (.75f + 3f + currentTrial.duration).ToString() }
+            new List<string>() { participantNumber.ToString(), trialNumber.ToString(), ((.75f + 3f + currentTrial.duration) * 1000).ToString() }
         ));
     }
 
@@ -111,6 +113,10 @@ public class SuiteController : MonoBehaviour
         if (trialNumber >= trialSet.Count)
         {
             EndTrialSet();
+        }
+        else if (autoPlayOnNext)
+        {
+            PlayTrial();
         }
     }
 
@@ -131,9 +137,40 @@ public class SuiteController : MonoBehaviour
         {
             NextTrial();
         }
+        if (message.StartsWith("response"))
+        {
+            SaveTrialResponse(message.Split(",")[1..]);
+        }
     }
 
-    public string GetMessageForTool(string command, List<string> parameters) {
+    public void SaveTrialResponse(string[] responseParams)
+    {
+        int responseParticipantNumber = int.Parse(responseParams[0]);
+        int responseTrialNumber = int.Parse(responseParams[1]);
+        string location = responseParams[2];
+        string thermal = responseParams[3];
+
+        string filePath = string.Format("{0}\\trial_responses\\p{1}_response.csv", studyFolder, responseParticipantNumber);
+        string directory = Path.GetDirectoryName(filePath);
+        if (!Directory.Exists(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+        bool fileExists = File.Exists(filePath);
+
+        using (StreamWriter writer = new(filePath, append: true, Encoding.UTF8))
+        {
+            if (!fileExists)
+            {
+                writer.WriteLine("participantNumber,trialNumber,location,thermal");
+            }
+            writer.WriteLine($"{responseParticipantNumber},{responseTrialNumber},{location},{thermal}");
+        }
+        Console.WriteLine($"Wrote trial {responseTrialNumber} to CSV.");
+    }
+
+    public string GetMessageForTool(string command, List<string> parameters)
+    {
         return string.Format("${0},{1}", command, string.Join(",", parameters));
     }
 

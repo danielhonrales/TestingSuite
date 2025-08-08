@@ -9,6 +9,7 @@ public class ToolController : MonoBehaviour
     public TrialResponse trialResponse;
     public GameObject idleScreen;
     public GameObject midTrialScreen;
+    public GameObject nextTrialScreen;
     public List<GameObject> responseScreens;
     public int currentQuestion;
 
@@ -45,6 +46,7 @@ public class ToolController : MonoBehaviour
 
         trialResponse = new()
         {
+            participantNumber = participantNumber,
             trialNumber = trialNumber
         };
 
@@ -104,10 +106,20 @@ public class ToolController : MonoBehaviour
 
     public void EndTrial()
     {
-        toolTCP.SendMessageToSuite(trialResponse.ToListString());
+        foreach (GameObject responseScreen in responseScreens)
+        {
+            responseScreen.SetActive(false);
+        }
+        StartCoroutine(EndTrialHelper());
+    }
 
-        idleScreen.SetActive(true);
-        StartCoroutine(NextTrial());
+    private IEnumerator EndTrialHelper()
+    {
+        toolTCP.SendMessageToSuite(string.Format("response," + trialResponse.ToListString()));
+        midTrialScreen.SetActive(true);
+        yield return new WaitForSeconds(.1f);
+        midTrialScreen.SetActive(false);
+        nextTrialScreen.SetActive(true);
     }
 
     public void EndExperiment()
@@ -146,15 +158,17 @@ public class ToolController : MonoBehaviour
         testing = false;
     }
 
-    private IEnumerator NextTrial()
+    public void NextTrial()
     {
+        nextTrialScreen.SetActive(false);
+        idleScreen.SetActive(true);
         string message = "nexttrial";
-        yield return new WaitForSeconds(.1f);
         toolTCP.SendMessageToSuite(message);
     }
 
     public class TrialResponse
     {
+        public int participantNumber;
         public int trialNumber;
         public List<string> responses = new();
 
