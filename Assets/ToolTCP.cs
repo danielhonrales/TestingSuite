@@ -94,27 +94,20 @@ public class ToolTCP : MonoBehaviour
 
     public void ReadMessageFromSuite()
     {
-        try
+        byte[] buffer = new byte[4096];
+        while (isRunning)
         {
-            byte[] buffer = new byte[4096];
-            while (isRunning)
+            if (stream.CanRead)
             {
-                if (stream.CanRead)
+                int bytesRead = stream.Read(buffer, 0, buffer.Length);
+                if (bytesRead > 0)
                 {
-                    int bytesRead = stream.Read(buffer, 0, buffer.Length);
-                    if (bytesRead > 0)
-                    {
-                        string receivedMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                        Debug.Log("Received: " + receivedMessage);
+                    string receivedMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead)[..^1];
+                    Debug.Log("Received: " + receivedMessage);
 
-                        toolController.HandleMessageFromSuite(receivedMessage);
-                    }
+                    toolController.HandleMessageFromSuite(receivedMessage);
                 }
             }
-        }
-        catch (Exception e)
-        {
-            Debug.LogError("Error receiving data: " + e.Message);
         }
     }
 

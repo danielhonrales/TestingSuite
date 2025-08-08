@@ -97,6 +97,10 @@ public class SuiteController : MonoBehaviour
         StartCoroutine(CooldownPlay());
         TrialInfo currentTrial = trialSet[trialNumber - 1];
         communicationController.SendMessageToPi(currentTrial.GetPiMessage());
+        communicationController.SendMessageToResponseTool(GetMessageForTool(
+            "trialstart",
+            new List<string>() { participantNumber.ToString(), trialNumber.ToString(), (.75f + 3f + currentTrial.duration).ToString() }
+        ));
     }
 
     public void NextTrial()
@@ -127,6 +131,10 @@ public class SuiteController : MonoBehaviour
         {
             NextTrial();
         }
+    }
+
+    public string GetMessageForTool(string command, List<string> parameters) {
+        return string.Format("${0},{1}", command, string.Join(",", parameters));
     }
 
     public IEnumerator CooldownPlay()

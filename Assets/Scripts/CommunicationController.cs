@@ -34,7 +34,7 @@ public class CommunicationController : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        toolListenerThread = new Thread(new ThreadStart(ListenForToolConnection)){IsBackground = true};
+        toolListenerThread = new Thread(new ThreadStart(ListenForResponseToolConnection)){IsBackground = true};
         toolListenerThread.Start();
     }
 
@@ -90,7 +90,10 @@ public class CommunicationController : MonoBehaviour
             // Send messages
             for (int i = 0; i < packetCount; i++)
             {
-                stream.Write(data[(i * packetSize)..Math.Min(((i + 1) * packetSize), data.Length)], 0, data.Length);
+                int start = i * packetSize;
+                int end = Math.Min((i + 1) * packetSize, data.Length);
+                int length = end - start;
+                stream.Write(data, start, length);
             }
             Debug.Log("Message sent");
 
@@ -104,7 +107,7 @@ public class CommunicationController : MonoBehaviour
         }
     }
 
-    public void ListenForToolConnection()
+    public void ListenForResponseToolConnection()
     {
         try
         {
@@ -114,10 +117,8 @@ public class CommunicationController : MonoBehaviour
             Debug.Log("TestingSuite is listening for tool conenction");
             while (true)
             {
-                using (toolClient = toolListener.AcceptTcpClient())
-                {				
-                    toolStream = toolClient.GetStream();
-                }
+                toolClient = toolListener.AcceptTcpClient();	
+                toolStream = toolClient.GetStream();
             }
         }
         catch (SocketException socketException)
@@ -126,7 +127,7 @@ public class CommunicationController : MonoBehaviour
         }
     }
 
-    public void SendMessageToTool(string message)
+    public void SendMessageToResponseTool(string message)
     {
         Debug.Log("Sending message to tool: " + message);
         SendMessage(message, toolStream);
