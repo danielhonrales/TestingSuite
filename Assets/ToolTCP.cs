@@ -67,14 +67,14 @@ public class ToolTCP : MonoBehaviour
         }
     }
 
-    public void SendMessageToSuite(string signal)
+    public void SendMessageToSuite(string message)
     {
         int packetSize = 4096;
 
         try
         {
             // Translate the signal string into bytes
-            byte[] data = Encoding.ASCII.GetBytes(signal + "$");
+            byte[] data = Encoding.ASCII.GetBytes(message + "$");
 
             // Send message count
             int packetCount = (int)Math.Ceiling((float)data.Length / packetSize);
@@ -84,6 +84,7 @@ public class ToolTCP : MonoBehaviour
             for (int i = 0; i < packetCount; i++)
             {
                 stream.Write(data[(i * packetSize)..Math.Min(((i + 1) * packetSize), data.Length)], 0, data.Length);
+                Debug.Log($"Wrote message to stream: {message}");
             }
         }
         catch (Exception e)
