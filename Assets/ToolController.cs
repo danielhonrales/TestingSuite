@@ -17,6 +17,7 @@ public class ToolController : MonoBehaviour
     public float waitTime;
 
     public bool testing = false;
+    public bool starting = false;
 
     // Start is called before the first frame update
     void Start()
@@ -30,6 +31,11 @@ public class ToolController : MonoBehaviour
         if (testing)
         {
             Test();
+        }
+        if (starting)
+        {
+            starting = false;
+            StartTrial();
         }
     }
 
@@ -123,7 +129,7 @@ public class ToolController : MonoBehaviour
             trialNumber = int.Parse(messageParams[2]);
             waitTime = float.Parse(messageParams[3]);
 
-            StartTrial();
+            starting = true;    // Must use bool instead of func because SetActive only possible in main thread
         }
 
         if (message.StartsWith("$experimentend"))
