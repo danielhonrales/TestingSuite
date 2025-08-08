@@ -41,7 +41,7 @@ public class ToolController : MonoBehaviour
 
     public void StartTrial()
     {
-        Debug.Log(string.Format("Staring trial {0}, waiting for {1}", trialNumber, waitTime));
+        Debug.Log(string.Format("Staring trial {0}, waiting for {1}", trialNumber, waitTime / 1000));
 
         trialResponse = new()
         {

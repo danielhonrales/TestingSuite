@@ -69,7 +69,12 @@ public class DrawingBoard : MonoBehaviour
     public void SaveDrawing()
     {
         byte[] bytes = texture.EncodeToPNG();
-        string path = Path.Combine(savePath, string.Format("p{0}_trial{1}_drawing.png", toolController.participantNumber, toolController.trialNumber));
+        string folderPath = Path.Combine(savePath, "p" + toolController.participantNumber.ToString());
+        string path = Path.Combine(folderPath, string.Format("p{0}_trial{1}_drawing.png", toolController.participantNumber, toolController.trialNumber));
+        if (!Directory.Exists(folderPath))
+        {
+            Directory.CreateDirectory(folderPath);
+        }
         File.WriteAllBytes(path, bytes);
         Debug.Log("Saved drawing to: " + path);
     }
