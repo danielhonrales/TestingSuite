@@ -38,7 +38,7 @@ public class ToolTCP : MonoBehaviour
         }
     }
 
-    public void ConnectToPC()
+    public void ConnectToSuite()
     {
         if (client != null && !client.Connected)
         {
