@@ -174,7 +174,8 @@ public class ToolController : MonoBehaviour
 
         public string ToListString()
         {
-            return string.Format("{0},{1}",
+            return string.Format("{0},{1},{2}",
+                participantNumber,
                 trialNumber,
                 string.Join(",", responses)
             );
