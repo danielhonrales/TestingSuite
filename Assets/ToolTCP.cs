@@ -116,6 +116,7 @@ public class ToolTCP : MonoBehaviour
     {
         Debug.Log("Socket Exception: " + e);
         button.image.color = Color.red;
+        button.interactable = true;
     }
 
     void OnApplicationQuit()

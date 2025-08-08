@@ -117,8 +117,9 @@ public class CommunicationController : MonoBehaviour
             Debug.Log("TestingSuite is listening for tool conenction");
             while (true)
             {
-                toolClient = toolListener.AcceptTcpClient();	
+                toolClient = toolListener.AcceptTcpClient();
                 toolStream = toolClient.GetStream();
+                ReceiveMessageFromTool();
             }
         }
         catch (SocketException socketException)
@@ -143,7 +144,6 @@ public class CommunicationController : MonoBehaviour
             var incommingData = new byte[length];
             Array.Copy(bytes, 0, incommingData, 0, length);
             string messageFromTool = Encoding.ASCII.GetString(incommingData);
-            messageFromTool = messageFromTool[..^1];
             Debug.Log("Received message from Tool: " + messageFromTool);
 
             suiteController.HandleMessageFromTool(messageFromTool);

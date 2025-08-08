@@ -35,7 +35,7 @@ public class SuiteController : MonoBehaviour
 
         trialNumber = 1;
         ChangeTrialNumber();
-        
+        playButton.interactable = false;
     }
 
     // Update is called once per frame
@@ -84,6 +84,7 @@ public class SuiteController : MonoBehaviour
     {
         LoadTrialSet();
         DisplayTrialInfo(trialSet[0]);
+        playButton.interactable = true;
     }
 
     public void EndTrialSet()
@@ -145,10 +146,10 @@ public class SuiteController : MonoBehaviour
 
     public void SaveTrialResponse(string[] responseParams)
     {
-        int responseParticipantNumber = int.Parse(responseParams[0]);
-        int responseTrialNumber = int.Parse(responseParams[1]);
-        string location = responseParams[2];
-        string thermal = responseParams[3];
+        int responseParticipantNumber = int.Parse(responseParams[1]);
+        int responseTrialNumber = int.Parse(responseParams[2]);
+        string location = responseParams[3];
+        string thermal = responseParams[4];
 
         string filePath = string.Format("{0}\\trial_responses\\p{1}_response.csv", studyFolder, responseParticipantNumber);
         string directory = Path.GetDirectoryName(filePath);
