@@ -19,6 +19,7 @@ public class SuiteController : MonoBehaviour
     public int trialNumber;
     public List<TrialInfo> trialSet;
     public bool autoPlayOnNext;
+    private bool startNextTrial;
 
     [Space(10)]
     [Header("References")]
@@ -32,16 +33,20 @@ public class SuiteController : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-
         trialNumber = 1;
         ChangeTrialNumber();
         playButton.interactable = false;
+        startNextTrial = false;
     }
 
     // Update is called once per frame
     void Update()
     {
-
+        if (startNextTrial)
+        {
+            startNextTrial = false;
+            NextTrial();
+        }
     }
 
     public void LoadTrialSet()
@@ -136,11 +141,11 @@ public class SuiteController : MonoBehaviour
     {
         if (message.StartsWith("nexttrial"))
         {
-            NextTrial();
+            startNextTrial = true;
         }
         if (message.StartsWith("response"))
         {
-            SaveTrialResponse(message.Split(",")[1..]);
+            SaveTrialResponse(message.Split(","));
         }
     }
 
