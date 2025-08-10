@@ -12,6 +12,8 @@ public class DrawingBoard : MonoBehaviour
     private RectTransform rectTransform;
     public ToolController toolController;
 
+    private Vector2Int? lastDrawPos = null;
+
     void Start()
     {
         rectTransform = drawingSurface.GetComponent<RectTransform>();
@@ -28,7 +30,6 @@ public class DrawingBoard : MonoBehaviour
 
     void Update()
     {
-        // Handle touch (mobile) or mouse (editor testing)
         if (Input.GetMouseButton(0))
         {
             Vector2 localPoint;
@@ -39,7 +40,22 @@ public class DrawingBoard : MonoBehaviour
                 (int)(localPoint.y + rectTransform.rect.height / 2)
             );
 
-            DrawAt(texCoord.x, texCoord.y);
+            if (lastDrawPos == null)
+            {
+                // First point
+                DrawAt(texCoord.x, texCoord.y);
+                lastDrawPos = texCoord;
+            }
+            else
+            {
+                // Draw line between last point and current point
+                DrawLine(lastDrawPos.Value, texCoord);
+                lastDrawPos = texCoord;
+            }
+        }
+        else
+        {
+            lastDrawPos = null;  // Reset when not drawing
         }
     }
 
@@ -64,6 +80,38 @@ public class DrawingBoard : MonoBehaviour
                 {
                     texture.SetPixel(px, py, drawColor);
                 }
+            }
+        }
+    }
+
+    void DrawLine(Vector2Int start, Vector2Int end)
+    {
+        int dx = Mathf.Abs(end.x - start.x);
+        int dy = Mathf.Abs(end.y - start.y);
+
+        int sx = start.x < end.x ? 1 : -1;
+        int sy = start.y < end.y ? 1 : -1;
+
+        int err = dx - dy;
+        int x = start.x;
+        int y = start.y;
+
+        while (true)
+        {
+            DrawAt(x, y);
+
+            if (x == end.x && y == end.y) break;
+
+            int e2 = 2 * err;
+            if (e2 > -dy)
+            {
+                err -= dy;
+                x += sx;
+            }
+            if (e2 < dx)
+            {
+                err += dx;
+                y += sy;
             }
         }
         texture.Apply();
