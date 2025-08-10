@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-public class TrialInfo_Study2_Saltation : TrialInfo
+public class TrialInfo_Study3_Motion : TrialInfo
 {
 
     // Factors
     public int temperature;
     public int direction;
 
-    public TrialInfo_Study2_Saltation(string rawInfo) : base(rawInfo)
+    public TrialInfo_Study3_Motion(string rawInfo) : base(rawInfo)
     {
         string[] info = rawInfo.Split(',');
         this.temperature = int.Parse(info[1]);
@@ -20,20 +20,20 @@ public class TrialInfo_Study2_Saltation : TrialInfo
 
     public override string GetPiMessage()
     {
-        return JsonUtility.ToJson(new PiMessage_Study2_Saltation(this));
+        return JsonUtility.ToJson(new PiMessage_Study3_Motion(this));
     }
 }
 
-public class PiMessage_Study2_Saltation
+public class PiMessage_Study3_Motion
 {
     public string illusion;
     public double thermalVoltage;
     public float duration;
     public int direction;
 
-    public PiMessage_Study2_Saltation(TrialInfo_Study2_Saltation trialInfo)
+    public PiMessage_Study3_Motion(TrialInfo_Study3_Motion trialInfo)
     {
-        illusion = "saltation";
+        illusion = "motion";
         thermalVoltage = Math.Round(ThermalVoltageMapping.mapping[trialInfo.temperature], 1);
         duration = trialInfo.duration;
         direction = trialInfo.direction;

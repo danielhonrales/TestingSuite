@@ -234,7 +234,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 521555469}
-  - component: {fileID: 521555468}
+  - component: {fileID: 521555471}
   m_Layer: 0
   m_Name: SuiteController
   m_TagString: Untagged
@@ -242,28 +242,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &521555468
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 521555467}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5da2b57f3dec03a4aba81a5e997442d3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  studyFolder: Assets/Studies/CHI26_Study2_Saltation
-  participantNumber: 1
-  trialNumber: 0
-  autoPlayOnNext: 1
-  textParticipantNumber: {fileID: 1553168871}
-  textTrialNumber: {fileID: 598668297}
-  trialInfoContainer: {fileID: 1977804972}
-  trialInfoItemPrefab: {fileID: 4488619868352953132, guid: 791c062d37ce19c42b7d6ab56941c53d, type: 3}
-  communicationController: {fileID: 1921729773}
-  playButton: {fileID: 891147149}
 --- !u!4 &521555469
 Transform:
   m_ObjectHideFlags: 0
@@ -279,6 +257,29 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &521555471
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 521555467}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b96c1f8dd54d22f49888814a6ebad7bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  studyFolder: Assets/Studies/CHI26_Study3_Motion
+  participantNumber: 1
+  trialNumber: 0
+  autoPlayOnNext: 1
+  startNextTrial: 0
+  textParticipantNumber: {fileID: 1553168871}
+  textTrialNumber: {fileID: 598668297}
+  trialInfoContainer: {fileID: 1977804972}
+  trialInfoItemPrefab: {fileID: 4488619868352953132, guid: 791c062d37ce19c42b7d6ab56941c53d, type: 3}
+  communicationController: {fileID: 1921729773}
+  playButton: {fileID: 891147149}
 --- !u!1 &560212470
 GameObject:
   m_ObjectHideFlags: 0
@@ -711,7 +712,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 521555468}
+      - m_Target: {fileID: 521555471}
         m_TargetAssemblyTypeName: SuiteController, Assembly-CSharp
         m_MethodName: PlayTrial
         m_Mode: 1
@@ -1615,9 +1616,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   piIP: 172.16.136.142
   piPort: 25567
-  suiteIP: 172.16.136.202
+  suiteIP: 192.168.0.216
   hostingPort: 25568
-  suiteController: {fileID: 521555468}
+  suiteController: {fileID: 521555471}
   piConnectButton: {fileID: 1429927744}
 --- !u!4 &1921729774
 Transform:
@@ -1752,7 +1753,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 521555468}
+      - m_Target: {fileID: 521555471}
         m_TargetAssemblyTypeName: SuiteController, Assembly-CSharp
         m_MethodName: NextTrial
         m_Mode: 1

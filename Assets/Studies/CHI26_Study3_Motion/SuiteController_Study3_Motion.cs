@@ -9,12 +9,12 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SuiteController_Study2_Saltation : SuiteController
+public class SuiteController_Study3_Motion : SuiteController
 {
 
     public override TrialInfo CreateTrialInfo(string data)
     {
-        return new TrialInfo_Study2_Saltation(data);
+        return new TrialInfo_Study3_Motion(data);
     }
 
     public override void SaveTrialResponse(string[] responseParams)
@@ -22,7 +22,7 @@ public class SuiteController_Study2_Saltation : SuiteController
         string[] responseArray = PadResponseArray(responseParams, 4);
         int responseParticipantNumber = int.Parse(responseArray[0]);
         int responseTrialNumber = int.Parse(responseArray[1]);
-        string location = responseArray[2];
+        string feltMotion = responseArray[2];
         string thermal = responseArray[3];
 
         string filePath = string.Format("{0}\\trial_responses\\p{1}_response.csv", studyFolder, responseParticipantNumber);
@@ -37,9 +37,9 @@ public class SuiteController_Study2_Saltation : SuiteController
         {
             if (!fileExists)
             {
-                writer.WriteLine("participantNumber,trialNumber,location,thermal");
+                writer.WriteLine("participantNumber,trialNumber,feltMotion,thermal");
             }
-            writer.WriteLine($"{responseParticipantNumber},{responseTrialNumber},{location},{thermal}");
+            writer.WriteLine($"{responseParticipantNumber},{responseTrialNumber},{feltMotion},{thermal}");
         }
         Console.WriteLine($"Wrote trial {responseTrialNumber} to CSV.");
     }

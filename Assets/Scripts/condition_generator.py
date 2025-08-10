@@ -3,18 +3,33 @@ import random
 import pandas as pd
 import os
 
+# Study 1
+""" "Temperature": [9, 6, 0, -12, -15],
+"Duration": [0.1, 0.5, 1, 1.5, 2],
+"Location": [0, 0.25, 0.5, 0.75, 1] """
+
+# Study 2
+""" "Temperature": [9, 6, 0, -12, -15],
+"Duration": [0.1, 0.2, 0.3, 0.4, 0.5],
+"Direction": ["To-Elbow", "To-Wrist"] """
+
+# Study 3
+""" "Temperature": [9, 6, 0, -12, -15],
+"Duration": [0.1, 0.5, 1.0, 1.5, 2.0],
+"Direction": [0, 1] """
+
 # Conditions
 factors = {
     "Temperature": [9, 6, 0, -12, -15],
-    "Duration": [0.1, 0.5, 1, 1.5, 2],
-    "Location": [0, 0.25, 0.5, 0.75, 1]
+    "Duration": [0.1, 0.2, 0.3, 0.4, 0.5],
+    "Direction": [0, 1]
 }
 
 block_factor = None
 repetitions = 3
 
 # Create the output folder
-output_folder = '../Studies/CHI26_Study1_Funneling/trial_info'
+output_folder = '../Studies/CHI26_Study2_Saltation/trial_info'
 os.makedirs(output_folder, exist_ok=True)
 
 # Generate all possible combinations

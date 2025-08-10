@@ -1448,6 +1448,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e43f52ce7b792eb48bbbd01f47ebeed9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  drawingSavePath: Assets/Studies/CHI26_Study2_Saltation/drawings
   toolTCP: {fileID: 1921729775}
   idleScreen: {fileID: 2127985352}
   midTrialScreen: {fileID: 1519422281}
@@ -5621,7 +5622,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aae9ad93624c49a4b8c3a0d760bb2b56, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  savePath: Assets/Studies/CHI26_Study2_Saltation/drawings
   drawingSurface: {fileID: 1592860634}
   drawColor: {r: 1, g: 0, b: 0, a: 1}
   brushSize: 2
@@ -6862,6 +6862,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   suiteIP: 172.16.136.202
   port: 25568
+  startHeartbeat: 0
   button: {fileID: 1429927743}
   inputIP: {fileID: 1705565523}
   toolController: {fileID: 521555470}
