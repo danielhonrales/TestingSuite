@@ -21,12 +21,7 @@ public class DrawingBoard : MonoBehaviour
         texture = new Texture2D(width, height, TextureFormat.RGBA32, false);
         texture.filterMode = FilterMode.Point;
 
-        Color[] clearColorArray = new Color[texture.width * texture.height];
-        for (int i = 0; i < clearColorArray.Length; ++i)
-            clearColorArray[i] = new Color(0, 0, 0, 0); // fully transparent
-
-        texture.SetPixels(clearColorArray);
-        texture.Apply();
+        ClearBoard();
 
         drawingSurface.texture = texture;
     }
@@ -46,6 +41,15 @@ public class DrawingBoard : MonoBehaviour
 
             DrawAt(texCoord.x, texCoord.y);
         }
+    }
+
+    public void ClearBoard()
+    {
+        Color[] clearColorArray = new Color[texture.width * texture.height];
+        for (int i = 0; i < clearColorArray.Length; ++i)
+            clearColorArray[i] = new Color(0, 0, 0, 0); // fully transparent
+        texture.SetPixels(clearColorArray);
+        texture.Apply();
     }
 
     void DrawAt(int x, int y)
@@ -76,6 +80,8 @@ public class DrawingBoard : MonoBehaviour
         }
         File.WriteAllBytes(path, bytes);
         Debug.Log("Saved drawing to: " + path);
+
+        ClearBoard();
     }
 
     public void ClearDrawing()

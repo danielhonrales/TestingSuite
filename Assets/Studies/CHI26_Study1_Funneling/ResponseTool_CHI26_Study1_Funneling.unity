@@ -5622,7 +5622,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aae9ad93624c49a4b8c3a0d760bb2b56, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  savePath: Assets/Studies/CHI26_Study1_Funneling/drawings
   drawingSurface: {fileID: 1592860634}
   drawColor: {r: 1, g: 0, b: 0, a: 1}
   brushSize: 2
@@ -6861,7 +6860,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b08522fd3382a8047abd1916021c3606, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  suiteIP: 172.16.136.202
+  suiteIP: 192.168.0.216
   port: 25568
   button: {fileID: 1429927743}
   inputIP: {fileID: 1705565523}

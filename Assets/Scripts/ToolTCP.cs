@@ -16,6 +16,7 @@ public class ToolTCP : MonoBehaviour
     public NetworkStream stream;
     private Thread receiveThread;
     private bool isRunning = false;
+    public bool startHeartbeat;
 
     public Button button;
     public TMP_InputField inputIP;
@@ -36,6 +37,11 @@ public class ToolTCP : MonoBehaviour
         {
             //Debug.Log("SignalSender is not connected");
             button.image.color = Color.red;
+        }
+        if (startHeartbeat)
+        {
+            startHeartbeat = false;
+            StartCoroutine(Heartbeat());
         }
     }
 
@@ -96,7 +102,6 @@ public class ToolTCP : MonoBehaviour
 
     public void ReadMessageFromSuite()
     {
-        StartCoroutine(Heartbeat());
         byte[] buffer = new byte[4096];
         while (isRunning)
         {
