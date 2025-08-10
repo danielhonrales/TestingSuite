@@ -1448,6 +1448,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e43f52ce7b792eb48bbbd01f47ebeed9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  drawingSavePath: Assets/Studies/CHI26_Study1_Funneling/drawings
   toolTCP: {fileID: 1921729775}
   idleScreen: {fileID: 2127985352}
   midTrialScreen: {fileID: 1519422281}

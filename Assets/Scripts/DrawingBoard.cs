@@ -4,7 +4,6 @@ using System.IO;
 
 public class DrawingBoard : MonoBehaviour
 {
-    public string savePath;
     public RawImage drawingSurface;
     public Color drawColor = Color.red;
     public int brushSize = 5;
@@ -69,7 +68,7 @@ public class DrawingBoard : MonoBehaviour
     public void SaveDrawing()
     {
         byte[] bytes = texture.EncodeToPNG();
-        string folderPath = Path.Combine(savePath, "p" + toolController.participantNumber.ToString());
+        string folderPath = Path.Combine(toolController.drawingSavePath, "p" + toolController.participantNumber.ToString());
         string path = Path.Combine(folderPath, string.Format("p{0}_trial{1}_drawing.png", toolController.participantNumber, toolController.trialNumber));
         if (!Directory.Exists(folderPath))
         {

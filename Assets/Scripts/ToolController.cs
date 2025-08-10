@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class ToolController : MonoBehaviour
 {
+    public string drawingSavePath;
     public ToolTCP toolTCP;
 
     public TrialResponse trialResponse;
