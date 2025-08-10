@@ -29,18 +29,21 @@ public class SaltationQ2 : MonoBehaviour
     {
         thermal1 = thermal;
         thermal1UI.SetActive(false);
+        RecordResponse();
     }
 
     public void SelectThermal2(string thermal)
     {
         thermal2 = thermal;
         thermal2UI.SetActive(false);
+        RecordResponse();
     }
 
     public void SelectThermal3(string thermal)
     {
         thermal3 = thermal;
         thermal3UI.SetActive(false);
+        RecordResponse();
     }
 
     public void RecordResponse()
@@ -48,9 +51,9 @@ public class SaltationQ2 : MonoBehaviour
         if (!thermal1UI.activeSelf && !thermal2UI.activeSelf && !thermal3UI.activeSelf)
         {
             toolController.RecordTrialResponse($"[{thermal1},{thermal2},{thermal3}]");
+            toolController.NextQuestion();
+            ResetQ2();
         }
-
-        ResetQ2();
     }
 
     public void ResetQ2()
