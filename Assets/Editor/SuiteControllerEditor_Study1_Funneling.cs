@@ -1,14 +1,14 @@
 using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(SuiteController))]
-public class SuiteControllerEditor : Editor
+[CustomEditor(typeof(SuiteController_Study1_Funneling))]
+public class SuiteControllerEditor_Study1_Funneling : Editor
 {
     public override void OnInspectorGUI()
     {
         DrawDefaultInspector();
         
-        SuiteController suiteController = (SuiteController)target;
+        SuiteController_Study1_Funneling suiteController = (SuiteController_Study1_Funneling)target;
 
         GUILayout.Space(20);
 

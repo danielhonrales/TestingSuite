@@ -9,7 +9,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SuiteController : MonoBehaviour
+public class SuiteController_Study2_Saltation : MonoBehaviour
 {
 
     [Space(10)]
@@ -19,7 +19,7 @@ public class SuiteController : MonoBehaviour
     public int trialNumber;
     public List<TrialInfo> trialSet;
     public bool autoPlayOnNext;
-    public bool startNextTrial;
+    private bool startNextTrial;
 
     [Space(10)]
     [Header("References")]
@@ -59,18 +59,13 @@ public class SuiteController : MonoBehaviour
         //Debug.Log("Data length = " + data.Length.ToString());
         for (int i = 1; i < data.Length - 1; i++)
         {
-            trialSet.Add(CreateTrialInfo(data[i]));
+            trialSet.Add(new TrialInfo(data[i]));
         }
         for (int i = 0; i < trialSet.Count; i++)
         {
             Debug.Log("Trial " + (i + 1) + " | " + trialSet[i].rawInfo);
         }
         reader.Close();
-    }
-
-    public virtual TrialInfo CreateTrialInfo(string data)
-    {
-        return new TrialInfo(data);
     }
 
     public void DisplayTrialInfo(TrialInfo trialInfo)
@@ -154,7 +149,7 @@ public class SuiteController : MonoBehaviour
         }
     }
 
-    public virtual void SaveTrialResponse(string[] responseParams)
+    public void SaveTrialResponse(string[] responseParams)
     {
         string[] responseArray = PadResponseArray(responseParams, 4);
         int responseParticipantNumber = int.Parse(responseArray[0]);
