@@ -11,7 +11,7 @@ import os
 # Study 2
 """ "Temperature": [9, 6, 0, -12, -15],
 "Duration": [0.1, 0.2, 0.3, 0.4, 0.5],
-"Direction": ["To-Elbow", "To-Wrist"] """
+"Direction": [0, 1] """
 
 # Study 3
 """ "Temperature": [9, 6, 0, -12, -15],
@@ -66,8 +66,11 @@ def save_to_csv(trial_sets):
         df = pd.DataFrame(trial_set)
         file_name = f'p{participant_number}_trial_set.csv'
         file_path = os.path.join(output_folder, file_name)
-        df.to_csv(file_path, index=False)
-        print(f"Saved {file_name}")
+        try: 
+            df.to_csv(file_path, index=False)
+            print(f"Saved {file_name}")
+        except Exception as e:
+            print(f"Failed to save {file_name}")
 
 # Generate and save orders for 16 participants
 num_participants = 16
