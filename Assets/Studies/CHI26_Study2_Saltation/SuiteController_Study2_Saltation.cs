@@ -22,8 +22,10 @@ public class SuiteController_Study2_Saltation : SuiteController
         string[] responseArray = PadResponseArray(responseParams, 4);
         int responseParticipantNumber = int.Parse(responseArray[0]);
         int responseTrialNumber = int.Parse(responseArray[1]);
-        string location = responseArray[2];
-        string thermal = responseArray[3];
+        string locationsString = responseArray[2];
+        List<float> locations = ParseLocations(locationsString);
+        string thermalsString = responseArray[3];
+        List<string> thermals = ParseThermals(thermalsString);
 
         string filePath = string.Format("{0}\\trial_responses\\p{1}_response.csv", studyFolder, responseParticipantNumber);
         string directory = Path.GetDirectoryName(filePath);
@@ -37,10 +39,28 @@ public class SuiteController_Study2_Saltation : SuiteController
         {
             if (!fileExists)
             {
-                writer.WriteLine("participantNumber,trialNumber,location,thermal");
+                writer.WriteLine("participantNumber,trialNumber,locations,thermals");
             }
-            writer.WriteLine($"{responseParticipantNumber},{responseTrialNumber},{location},{thermal}");
+            writer.WriteLine($"{responseParticipantNumber},{responseTrialNumber},{string.Join(",", locations)},{string.Join(",", thermals)}");
         }
         Console.WriteLine($"Wrote trial {responseTrialNumber} to CSV.");
+    }
+
+    private List<float> ParseLocations(string locationsString)
+    {
+        return locationsString
+            .Trim('[', ']')                  // remove [ and ]
+            .Split('|')                      // split by comma
+            .Select(s => float.Parse(s.Trim())) // remove spaces and quotes
+            .ToList();
+    }
+
+    private List<string> ParseThermals(string thermalsString)
+    {
+        return thermalsString
+            .Trim('[', ']')                  // remove [ and ]
+            .Split('|')                      // split by comma
+            .Select(s => s.Trim().Trim('"')) // remove spaces and quotes
+            .ToList();
     }
 }

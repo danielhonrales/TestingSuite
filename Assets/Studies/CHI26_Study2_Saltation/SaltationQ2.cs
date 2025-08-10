@@ -50,7 +50,7 @@ public class SaltationQ2 : MonoBehaviour
     {
         if (!thermal1UI.activeSelf && !thermal2UI.activeSelf && !thermal3UI.activeSelf)
         {
-            toolController.RecordTrialResponse($"[{thermal1},{thermal2},{thermal3}]");
+            toolController.RecordTrialResponse($"[{thermal1}|{thermal2}|{thermal3}]");
             toolController.NextQuestion();
             ResetQ2();
         }
