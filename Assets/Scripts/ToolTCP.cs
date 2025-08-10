@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -95,6 +96,7 @@ public class ToolTCP : MonoBehaviour
 
     public void ReadMessageFromSuite()
     {
+        StartCoroutine(Heartbeat());
         byte[] buffer = new byte[4096];
         while (isRunning)
         {
@@ -125,5 +127,18 @@ public class ToolTCP : MonoBehaviour
         receiveThread?.Abort();
         stream?.Close();
         client?.Close();
+    }
+
+    public IEnumerator Heartbeat()
+    {
+        yield return new WaitForSeconds(1f);
+        if (client.Connected == false)
+        {
+            SocketError(new Exception("Heartbeat found no connection"));
+        }
+        else
+        {
+            StartCoroutine(Heartbeat());
+        }
     }
 }

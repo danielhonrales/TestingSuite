@@ -273,6 +273,7 @@ MonoBehaviour:
   participantNumber: 1
   trialNumber: 0
   autoPlayOnNext: 1
+  startNextTrial: 0
   textParticipantNumber: {fileID: 1553168871}
   textTrialNumber: {fileID: 598668297}
   trialInfoContainer: {fileID: 1977804972}
@@ -711,7 +712,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 521555470}
         m_TargetAssemblyTypeName: SuiteController, Assembly-CSharp
         m_MethodName: PlayTrial
         m_Mode: 1
@@ -1615,9 +1616,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   piIP: 172.16.136.142
   piPort: 25567
-  suiteIP: 172.16.136.202
+  suiteIP: 192.168.0.216
   hostingPort: 25568
-  suiteController: {fileID: 0}
+  suiteController: {fileID: 521555470}
   piConnectButton: {fileID: 1429927744}
 --- !u!4 &1921729774
 Transform:
@@ -1752,7 +1753,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 521555470}
         m_TargetAssemblyTypeName: SuiteController, Assembly-CSharp
         m_MethodName: NextTrial
         m_Mode: 1
