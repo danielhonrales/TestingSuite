@@ -1616,7 +1616,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   piIP: 172.16.136.142
   piPort: 25567
-  suiteIP: 172.16.136.202
+  suiteIP: 192.168.0.216
   hostingPort: 25568
   suiteController: {fileID: 521555470}
   piConnectButton: {fileID: 1429927744}

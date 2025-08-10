@@ -49,7 +49,7 @@ public class SaltationQ1 : MonoBehaviour
 
     public void SaveResponse()
     {
-        toolController.RecordTrialResponse(locations.ToString());
+        toolController.RecordTrialResponse($"[{string.Join(",", locations)}]");
         ResetQ1();
     }
 }
