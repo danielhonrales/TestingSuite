@@ -75,6 +75,10 @@ public class SuiteController : MonoBehaviour
 
     public void DisplayTrialInfo(TrialInfo trialInfo)
     {
+        for (int i = trialInfoContainer.transform.childCount - 1; i >= 0; i--)
+        {
+            Destroy(trialInfoContainer.transform.GetChild(i).gameObject);
+        }
         Type type = trialInfo.GetType();
         FieldInfo[] fields = type.GetFields();
         for (int i = 0; i < fields.Length; i++)
@@ -108,6 +112,7 @@ public class SuiteController : MonoBehaviour
     public void PlayTrial()
     {
         StartCoroutine(CooldownPlay());
+        DisplayTrialInfo(trialSet[trialNumber - 1]);
         TrialInfo currentTrial = trialSet[trialNumber - 1];
         communicationController.SendMessageToPi(currentTrial.GetPiMessage());
         communicationController.SendMessageToResponseTool(GetMessageForTool(

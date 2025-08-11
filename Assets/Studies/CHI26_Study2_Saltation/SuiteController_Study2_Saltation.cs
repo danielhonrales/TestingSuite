@@ -23,7 +23,9 @@ public class SuiteController_Study2_Saltation : SuiteController
         int responseParticipantNumber = int.Parse(responseArray[0]);
         int responseTrialNumber = int.Parse(responseArray[1]);
         string locationsString = responseArray[2];
-        List<float> locations = ParseLocations(locationsString);
+        List<string> locations = ParseLocations(locationsString);
+        locations = PadLocations(locations);
+        locations = ClearLocations(locations);
         string thermalsString = responseArray[3];
         List<string> thermals = ParseThermals(thermalsString);
 
@@ -39,20 +41,38 @@ public class SuiteController_Study2_Saltation : SuiteController
         {
             if (!fileExists)
             {
-                writer.WriteLine("participantNumber,trialNumber,locations,thermals");
+                writer.WriteLine("participantNumber,trialNumber,location1,location2,location3,thermal1,thermal2,thermal3");
             }
-            writer.WriteLine($"{responseParticipantNumber},{responseTrialNumber},{string.Join(",", locations)},{string.Join(",", thermals)}");
+            writer.WriteLine($"{responseParticipantNumber},{responseTrialNumber},{locations[0]},{locations[1]},{locations[2]},{thermals[0]},{thermals[1]},{thermals[2]}");
         }
         Console.WriteLine($"Wrote trial {responseTrialNumber} to CSV.");
     }
 
-    private List<float> ParseLocations(string locationsString)
+    private List<string> ParseLocations(string locationsString)
     {
         return locationsString
             .Trim('[', ']')                  // remove [ and ]
             .Split('|')                      // split by comma
-            .Select(s => float.Parse(s.Trim())) // remove spaces and quotes
+            .Select(s => s.Trim()) // remove spaces and quotes
             .ToList();
+    }
+
+    private List<string> PadLocations(List<string> locations)
+    {
+        while (locations.Count < 3)
+        {
+            locations.Add("");
+        }
+        return locations;
+    }
+
+    private List<string> ClearLocations(List<string> locations)
+    {
+        if (locations.Count > 3)
+        {
+            return new List<string> { "", "", "" };
+        }
+        return locations;
     }
 
     private List<string> ParseThermals(string thermalsString)

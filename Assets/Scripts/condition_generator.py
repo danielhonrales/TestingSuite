@@ -5,23 +5,23 @@ import os
 
 # Study 1
 """ "Temperature": [9, 6, 0, -12, -15],
-"Duration": [0.1, 0.5, 1, 1.5, 2],
-"Location": [0, 0.25, 0.5, 0.75, 1] """
+    "Duration": [0.1, 0.5, 1, 1.5, 2],
+    "Location": [0, 0.25, 0.5, 0.75, 1] """
 
 # Study 2
 """ "Temperature": [9, 6, 0, -12, -15],
-"Duration": [0.1, 0.2, 0.3, 0.4, 0.5],
-"Direction": [0, 1] """
+    "Duration": [0.1, 0.2, 0.3, 0.4, 0.5],
+    "Direction": [0, 1] """
 
 # Study 3
 """ "Temperature": [9, 6, 0, -12, -15],
-"Duration": [0.1, 0.5, 1.0, 1.5, 2.0],
-"Direction": [0, 1] """
+    "Duration": [0.1, 0.5, 1.0, 1.5, 2.0],
+    "Direction": [0, 1] """
 
 # Conditions
 factors = {
     "Temperature": [9, 6, 0, -12, -15],
-    "Duration": [0.1, 0.2, 0.3, 0.4, 0.5],
+    "Duration": [0.1, 0.5, 1.0, 1.5, 2.0],
     "Direction": [0, 1]
 }
 
@@ -29,7 +29,7 @@ block_factor = None
 repetitions = 3
 
 # Create the output folder
-output_folder = '../Studies/CHI26_Study2_Saltation/trial_info'
+output_folder = 'Assets/Studies/CHI26_Study3_Motion/trial_info'
 os.makedirs(output_folder, exist_ok=True)
 
 # Generate all possible combinations
@@ -68,7 +68,7 @@ def save_to_csv(trial_sets):
         file_path = os.path.join(output_folder, file_name)
         try: 
             df.to_csv(file_path, index=False)
-            print(f"Saved {file_name}")
+            print(f"Saved {file_path}")
         except Exception as e:
             print(f"Failed to save {file_name}")
 

@@ -1,2 +1,1 @@
-﻿participantNumber,trialNumber,location,thermal
-1,1,System.Collections.Generic.List`1[System.Single],Cold
+﻿participantNumber,trialNumber,location1,location2,location3,thermal1,thermal2,thermal3
