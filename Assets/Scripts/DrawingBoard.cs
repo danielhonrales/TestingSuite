@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.IO;
+using System.Collections.Generic;
 
 public class DrawingBoard : MonoBehaviour
 {
@@ -13,6 +14,9 @@ public class DrawingBoard : MonoBehaviour
     public ToolController toolController;
 
     private Vector2Int? lastDrawPos = null;
+    private List<Vector2Int> drawnPoints = new List<Vector2Int>();
+    private List<List<Vector2Int>> allShapes = new List<List<Vector2Int>>();
+    private List<Vector2Int> currentShape = new List<Vector2Int>();
 
     void Start()
     {
@@ -42,21 +46,76 @@ public class DrawingBoard : MonoBehaviour
 
             if (lastDrawPos == null)
             {
-                // First point
+                // New shape starting
+                currentShape = new List<Vector2Int>();
+                currentShape.Add(texCoord);
                 DrawAt(texCoord.x, texCoord.y);
                 lastDrawPos = texCoord;
             }
             else
             {
-                // Draw line between last point and current point
                 DrawLine(lastDrawPos.Value, texCoord);
+                currentShape.Add(texCoord);
                 lastDrawPos = texCoord;
             }
         }
-        else
+        else if (lastDrawPos != null)
         {
-            lastDrawPos = null;  // Reset when not drawing
+            // Mouse released — close and fill current shape
+            if (currentShape.Count > 2)
+            {
+                DrawLine(currentShape[currentShape.Count - 1], currentShape[0]);  // Close shape
+                FillShape(currentShape[0]);  // Fill starting from first point
+                allShapes.Add(currentShape); // Store shape
+            }
+
+            lastDrawPos = null;
+            currentShape = new List<Vector2Int>(); // Reset for next shape
         }
+    }
+
+    void FillShape(Vector2Int startPoint)
+    {
+        Queue<Vector2Int> queue = new Queue<Vector2Int>();
+        HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
+
+        queue.Enqueue(startPoint);
+        visited.Add(startPoint);
+
+        while (queue.Count > 0)
+        {
+            Vector2Int point = queue.Dequeue();
+
+            if (!IsInsideTexture(point)) continue;
+            Color pixelColor = texture.GetPixel(point.x, point.y);
+
+            if (pixelColor.a != 0) continue; // already drawn or edge
+
+            texture.SetPixel(point.x, point.y, drawColor);
+
+            // check 4 neighbors
+            Vector2Int[] directions = {
+            new Vector2Int(1, 0), new Vector2Int(-1, 0),
+            new Vector2Int(0, 1), new Vector2Int(0, -1)
+        };
+
+            foreach (var dir in directions)
+            {
+                Vector2Int neighbor = point + dir;
+                if (!visited.Contains(neighbor))
+                {
+                    queue.Enqueue(neighbor);
+                    visited.Add(neighbor);
+                }
+            }
+        }
+
+        texture.Apply();
+    }
+
+    bool IsInsideTexture(Vector2Int point)
+    {
+        return point.x >= 0 && point.x < texture.width && point.y >= 0 && point.y < texture.height;
     }
 
     public void ClearBoard()
@@ -66,6 +125,9 @@ public class DrawingBoard : MonoBehaviour
             clearColorArray[i] = new Color(0, 0, 0, 0); // fully transparent
         texture.SetPixels(clearColorArray);
         texture.Apply();
+        drawnPoints.Clear();
+        allShapes.Clear();
+        currentShape.Clear();
     }
 
     void DrawAt(int x, int y)
@@ -143,5 +205,8 @@ public class DrawingBoard : MonoBehaviour
 
         texture.SetPixels(clearColors);
         texture.Apply();
+        drawnPoints.Clear();
+        allShapes.Clear();
+        currentShape.Clear();
     }
 }

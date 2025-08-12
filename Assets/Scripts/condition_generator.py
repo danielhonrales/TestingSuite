@@ -21,15 +21,19 @@ import os
 # Conditions
 factors = {
     "Temperature": [9, 6, 0, -12, -15],
-    "Duration": [0.1, 0.5, 1.0, 1.5, 2.0],
-    "Direction": [0, 1]
+    "Duration": [0.1, 0.5, 1, 1.5, 2],
+    "Location": [0, 0.25, 0.5, 0.75, 1]
 }
 
 block_factor = None
 repetitions = 3
 
+# Participants
+num_participants = 1
+first_par = 19
+
 # Create the output folder
-output_folder = 'Assets/Studies/CHI26_Study3_Motion/trial_info'
+output_folder = 'Assets/Studies/CHI26_Study1_Funneling/trial_info'
 os.makedirs(output_folder, exist_ok=True)
 
 # Generate all possible combinations
@@ -37,10 +41,10 @@ def generate_combinations():
     return list(itertools.product(*factors.values()))
 
 # Generate the randomized orders with repetitions for a given number of participants
-def generate_trial_sets(num_participants):
+def generate_trial_sets(num_participants, first_par):
     trial_sets = []
     all_combinations = generate_combinations()
-    for participant in range(1, num_participants + 1):
+    for participant in range(first_par, first_par + num_participants):
         trial_set = []
 
         # if blocking
@@ -73,6 +77,5 @@ def save_to_csv(trial_sets):
             print(f"Failed to save {file_name}")
 
 # Generate and save orders for 16 participants
-num_participants = 16
-trial_sets = generate_trial_sets(num_participants)
+trial_sets = generate_trial_sets(num_participants, first_par)
 save_to_csv(trial_sets)
