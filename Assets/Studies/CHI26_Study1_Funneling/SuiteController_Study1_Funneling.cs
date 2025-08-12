@@ -19,11 +19,12 @@ public class SuiteController_Study1_Funneling : SuiteController
 
     public override void SaveTrialResponse(string[] responseParams)
     {
-        string[] responseArray = PadResponseArray(responseParams, 4);
+        string[] responseArray = PadResponseArray(responseParams, 2 + 3);
         int responseParticipantNumber = int.Parse(responseArray[0]);
         int responseTrialNumber = int.Parse(responseArray[1]);
-        string location = responseArray[2];
-        string thermal = responseArray[3];
+        string thermal = responseArray[2];
+        string location = responseArray[3];
+        string feltIllusion = responseArray[4];
 
         string filePath = string.Format("{0}\\trial_responses\\p{1}_response.csv", studyFolder, responseParticipantNumber);
         string directory = Path.GetDirectoryName(filePath);
@@ -37,9 +38,9 @@ public class SuiteController_Study1_Funneling : SuiteController
         {
             if (!fileExists)
             {
-                writer.WriteLine("participantNumber,trialNumber,location,thermal");
+                writer.WriteLine("participantNumber,trialNumber,location,thermal,feltIllusion");
             }
-            writer.WriteLine($"{responseParticipantNumber},{responseTrialNumber},{location},{thermal}");
+            writer.WriteLine($"{responseParticipantNumber},{responseTrialNumber},{location},{thermal},{feltIllusion}");
         }
         Console.WriteLine($"Wrote trial {responseTrialNumber} to CSV.");
     }

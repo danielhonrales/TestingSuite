@@ -14,7 +14,7 @@ public class TrialInfo
         duration = 0;
     }
 
-    public virtual string GetPiMessage()
+    public virtual string GetPiMessage(int baseTemp)
     {
         return JsonUtility.ToJson(new PiMessage(this));
     }

@@ -18,9 +18,9 @@ public class TrialInfo_Study1_Funneling : TrialInfo
         this.location = float.Parse(info[3]);
     }
 
-    public override string GetPiMessage()
+    public override string GetPiMessage(int baseTemp)
     {
-        return JsonUtility.ToJson(new PiMessage_Study1_Funneling(this));
+        return JsonUtility.ToJson(new PiMessage_Study1_Funneling(baseTemp + temperature, this));
     }
 }
 
@@ -31,10 +31,10 @@ public class PiMessage_Study1_Funneling
     public float duration;
     public float location;
 
-    public PiMessage_Study1_Funneling(TrialInfo_Study1_Funneling trialInfo)
+    public PiMessage_Study1_Funneling(int targetTemp, TrialInfo_Study1_Funneling trialInfo)
     {
         illusion = "funneling";
-        thermalVoltage = Math.Round(ThermalVoltageMapping.mapping[trialInfo.temperature], 1);
+        thermalVoltage = Math.Round(ThermalVoltageMapping.targetTempToVoltMapping[targetTemp], 1);
         duration = trialInfo.duration;
         location = trialInfo.location;
     }

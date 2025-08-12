@@ -17,6 +17,7 @@ public class SuiteController : MonoBehaviour
     public string studyFolder;
     public int participantNumber;
     public int trialNumber;
+    public int baseTemp;
     public List<TrialInfo> trialSet;
     public bool autoPlayOnNext;
     public bool startNextTrial;
@@ -114,7 +115,7 @@ public class SuiteController : MonoBehaviour
         StartCoroutine(CooldownPlay());
         DisplayTrialInfo(trialSet[trialNumber - 1]);
         TrialInfo currentTrial = trialSet[trialNumber - 1];
-        communicationController.SendMessageToPi(currentTrial.GetPiMessage());
+        communicationController.SendMessageToPi(currentTrial.GetPiMessage(baseTemp));
         communicationController.SendMessageToResponseTool(GetMessageForTool(
             "trialstart",
             new List<string>() { participantNumber.ToString(), trialNumber.ToString(), ((.75f + 3f + currentTrial.duration) * 1000).ToString() }

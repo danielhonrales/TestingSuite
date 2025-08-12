@@ -15,6 +15,7 @@ public class SuiteControllerEditor_Study2_Saltation : Editor
         if (GUILayout.Button("Change Trial Number"))
         {
             suiteController.ChangeTrialNumber();
+            suiteController.DisplayTrialInfo(suiteController.trialSet[suiteController.trialNumber]);
         }
 
         if (GUILayout.Button("Change Participant Number"))
