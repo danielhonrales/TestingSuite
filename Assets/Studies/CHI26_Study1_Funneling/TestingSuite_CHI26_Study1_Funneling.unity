@@ -272,6 +272,7 @@ MonoBehaviour:
   studyFolder: Assets/Studies/CHI26_Study1_Funneling
   participantNumber: 1
   trialNumber: 0
+  baseTemp: 0
   autoPlayOnNext: 1
   startNextTrial: 0
   textParticipantNumber: {fileID: 1553168871}
@@ -1617,7 +1618,7 @@ MonoBehaviour:
   piIP: 172.16.136.142
   piPort: 25567
   suiteIP: 172.16.136.202
-  hostingPort: 25568
+  hostingPort: 25569
   suiteController: {fileID: 521555470}
   piConnectButton: {fileID: 1429927744}
 --- !u!4 &1921729774

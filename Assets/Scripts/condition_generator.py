@@ -21,7 +21,7 @@ import os
 # Conditions
 factors = {
     "Temperature": [9, 6, 0, -12, -15],
-    "Duration": [0.1, 0.5, 1, 1.5, 2],
+    "Duration": [0.1, 0.5, 1],
     "Location": [0, 0.25, 0.5, 0.75, 1]
 }
 
@@ -29,8 +29,8 @@ block_factor = None
 repetitions = 3
 
 # Participants
-num_participants = 1
-first_par = 19
+num_participants = 3
+first_par = 17
 
 # Create the output folder
 output_folder = 'Assets/Studies/CHI26_Study1_Funneling/trial_info'
