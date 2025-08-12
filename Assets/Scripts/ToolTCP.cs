@@ -15,7 +15,7 @@ public class ToolTCP : MonoBehaviour
     public TcpClient client;
     public NetworkStream stream;
     private Thread receiveThread;
-    private bool isRunning = false;
+    public bool isRunning = false;
     public bool startHeartbeat;
 
     public Button button;
