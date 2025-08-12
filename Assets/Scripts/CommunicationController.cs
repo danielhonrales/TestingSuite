@@ -80,9 +80,14 @@ public class CommunicationController : MonoBehaviour
 
         try
         {
+            if (stream == null || !stream.CanWrite)
+            {
+                Debug.LogWarning("Stream is null or not writable.");
+                return;
+            }
+
             // Translate the signal string into bytes
             byte[] data = Encoding.ASCII.GetBytes(message + "$");
-
             // Send message count
             int packetCount = (int)Math.Ceiling((float)data.Length / packetSize);
             byte[] countData = Encoding.ASCII.GetBytes(packetCount.ToString());
@@ -119,7 +124,9 @@ public class CommunicationController : MonoBehaviour
             {
                 toolClient = toolListener.AcceptTcpClient();
                 toolStream = toolClient.GetStream();
-                ReceiveMessageFromTool();
+                Thread receiveThread = new Thread(ReceiveMessageFromTool);
+                receiveThread.IsBackground = true;
+                receiveThread.Start();
             }
         }
         catch (SocketException socketException)

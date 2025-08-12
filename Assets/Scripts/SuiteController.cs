@@ -127,7 +127,7 @@ public class SuiteController : MonoBehaviour
         trialNumber++;
         ChangeTrialNumber();
         playButton.interactable = true;
-        if (trialNumber >= trialSet.Count)
+        if (trialNumber > trialSet.Count)
         {
             EndTrialSet();
         }
