@@ -17,6 +17,7 @@ public class ToolController : MonoBehaviour
     public int participantNumber;
     public int trialNumber;
     public float waitTime;
+    public float restTime;
 
     public bool testing = false;
     public bool starting = false;
@@ -118,7 +119,7 @@ public class ToolController : MonoBehaviour
     {
         toolTCP.SendMessageToSuite(string.Format("response," + trialResponse.ToListString()));
         midTrialScreen.SetActive(true);
-        yield return new WaitForSeconds(.1f);
+        yield return new WaitForSeconds(restTime);
         midTrialScreen.SetActive(false);
         nextTrialScreen.SetActive(true);
     }

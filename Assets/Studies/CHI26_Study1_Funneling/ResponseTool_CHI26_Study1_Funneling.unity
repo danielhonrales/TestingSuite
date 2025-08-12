@@ -1315,6 +1315,7 @@ MonoBehaviour:
   participantNumber: 0
   trialNumber: 0
   waitTime: 0
+  restTime: 3
   testing: 0
   starting: 0
 --- !u!1 &559468841
@@ -4511,7 +4512,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   slider: {fileID: 1259472438}
-  q3Slider: {fileID: 0}
+  q3Slider: {fileID: 1313404231}
   icon: {fileID: 1245384239}
   toolController: {fileID: 521555470}
 --- !u!1 &1658812408
