@@ -21,6 +21,11 @@ public class FunnelingQ1 : MonoBehaviour
 
     }
 
+    void OnEnable()
+    {
+        ResetQuestion();
+    }
+
     public void DisableIcon()
     {
         icon.SetActive(false);
@@ -28,14 +33,16 @@ public class FunnelingQ1 : MonoBehaviour
 
     public void MatchSliders()
     {
+        q3Slider.interactable = true;
         q3Slider.value = slider.value;
+        q3Slider.interactable = false;
     }
 
     public void RecordResponse()
     {
         toolController.RecordTrialResponse(slider.value.ToString());
         toolController.NextQuestion();
-        ResetQuestion();
+        MatchSliders();
     }
 
     public void ResetQuestion()
