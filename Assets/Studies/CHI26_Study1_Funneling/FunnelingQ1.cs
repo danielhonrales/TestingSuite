@@ -26,10 +26,14 @@ public class FunnelingQ1 : MonoBehaviour
         icon.SetActive(false);
     }
 
+    public void MatchSliders()
+    {
+        q3Slider.value = slider.value;
+    }
+
     public void RecordResponse()
     {
         toolController.RecordTrialResponse(slider.value.ToString());
-        q3Slider.value = slider.value;
         toolController.NextQuestion();
         ResetQuestion();
     }
