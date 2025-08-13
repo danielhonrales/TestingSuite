@@ -4,8 +4,8 @@ import pandas as pd
 import os
 
 # Study 1
-""" "Temperature": [9, 6, 0, -12, -15],
-    "Duration": [0.1, 0.5, 1, 1.5, 2],
+""" "Temperature": [9, 0, -15],
+    "Duration": [0.1, 0.5, 1, 1.5],
     "Location": [0, 0.25, 0.5, 0.75, 1] """
 
 # Study 2
@@ -20,8 +20,8 @@ import os
 
 # Conditions
 factors = {
-    "Temperature": [9, 6, 0, -12, -15],
-    "Duration": [0.1, 0.5, 1],
+    "Temperature": [9, 0, -15],
+    "Duration": [0.1, 0.5, 1, 1.5],
     "Location": [0, 0.25, 0.5, 0.75, 1]
 }
 
