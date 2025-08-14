@@ -4,11 +4,11 @@ public static class ThermalVoltageMapping
 {
     public static readonly Dictionary<int, float> targetTempToVoltMapping = new()
     {
-        {42,     1.7f},
+        {42,     1.2f},
         {41,     1.6f},
-        {40,     1.55f},
+        {40,     1.35f},
         {39,     1.5f},
-        {38,     1.4f},
+        {38,     1.65f},
         {37,     1.3f},
         {36,     1.2f},
         {35,     1.1f},
@@ -28,7 +28,8 @@ public static class ThermalVoltageMapping
         {17,   -1.3f + coldBoost},
         {16,   -1.5f + coldBoost},
         {15,   -1.7f + coldBoost},
-        {12,   -2.3f + coldBoost},
+        {14,   -1.7f + coldBoost},
+        { 12,   -2.3f + coldBoost},
     };
     private static readonly float coldBoost = .5f;
 }

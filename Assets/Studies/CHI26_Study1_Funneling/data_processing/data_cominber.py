@@ -36,9 +36,21 @@ for key in common_keys:
 
     df1 = pd.read_csv(path1)
     df2 = pd.read_csv(path2)
+    df2 = df2.iloc[:, 1:]
+    df2 = df2.drop_duplicates(subset='trialNumber', keep='last')
 
     # Combine data: choose method
     combined = pd.concat([df1, df2], axis=1)  # side-by-side
+
+    # Insert trial column at 2nd column
+    # Reorder columns: move column at index 4 to index 1
+    cols = list(combined.columns)
+    col_to_move = cols.pop(4)
+    cols.insert(1, col_to_move)
+    combined = combined[cols]
+
+    # Rename Headers
+    combined.columns = ['Participant', 'Trial', 'Temperature', 'Duration', 'Location', 'FeltLocation', 'FeltThermal', 'FeltIllusion']
 
     # Save combined result
     out_path = os.path.join(output_folder, f"{key}_data.xlsx")

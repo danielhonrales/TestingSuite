@@ -30,7 +30,7 @@ repetitions = 3
 
 # Participants
 num_participants = 3
-first_par = 17
+first_par = 20
 
 # Create the output folder
 output_folder = 'Assets/Studies/CHI26_Study1_Funneling/trial_info'

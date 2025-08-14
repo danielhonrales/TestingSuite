@@ -23,8 +23,8 @@ public class SuiteController_Study1_Funneling : SuiteController
         int responseParticipantNumber = int.Parse(responseArray[0]);
         int responseTrialNumber = int.Parse(responseArray[1]);
         string thermal = responseArray[2];
-        string location = responseArray[3];
-        string feltIllusion = responseArray[4];
+        string clarity = responseArray[3];
+        string location = responseArray[4];
 
         string filePath = string.Format("{0}\\trial_responses\\p{1}_response.csv", studyFolder, responseParticipantNumber);
         string directory = Path.GetDirectoryName(filePath);
@@ -38,9 +38,9 @@ public class SuiteController_Study1_Funneling : SuiteController
         {
             if (!fileExists)
             {
-                writer.WriteLine("participantNumber,trialNumber,location,thermal,feltIllusion");
+                writer.WriteLine("participantNumber,trialNumber,thermal,clarity,location");
             }
-            writer.WriteLine($"{responseParticipantNumber},{responseTrialNumber},{location},{thermal},{feltIllusion}");
+            writer.WriteLine($"{responseParticipantNumber},{responseTrialNumber},{thermal},{clarity},{location}");
         }
         Console.WriteLine($"Wrote trial {responseTrialNumber} to CSV.");
     }
