@@ -22,12 +22,14 @@ public class SuiteController_Study2_Saltation : SuiteController
         string[] responseArray = PadResponseArray(responseParams, 4);
         int responseParticipantNumber = int.Parse(responseArray[0]);
         int responseTrialNumber = int.Parse(responseArray[1]);
-        string locationsString = responseArray[2];
-        List<string> locations = ParseLocations(locationsString);
-        locations = PadLocations(locations);
-        locations = ClearLocations(locations);
-        string thermalsString = responseArray[3];
-        List<string> thermals = ParseThermals(thermalsString);
+        int feltThermal = int.Parse(responseArray[2]);
+        int numberOfLocations = int.Parse(responseArray[3]);
+        List<float> locations = new();
+
+        for (int i = 0; i < numberOfLocations; i++)
+        {
+            locations.Add(float.Parse(responseArray[4 + i]));
+        }
 
         string filePath = string.Format("{0}\\trial_responses\\p{1}_response.csv", studyFolder, responseParticipantNumber);
         string directory = Path.GetDirectoryName(filePath);
@@ -41,9 +43,14 @@ public class SuiteController_Study2_Saltation : SuiteController
         {
             if (!fileExists)
             {
-                writer.WriteLine("participantNumber,trialNumber,location1,location2,location3,thermal1,thermal2,thermal3");
+                writer.WriteLine("participantNumber,trialNumber,feltThermal,numberOfLocations,location1,location2,location3,extraLocations");
             }
-            writer.WriteLine($"{responseParticipantNumber},{responseTrialNumber},{locations[0]},{locations[1]},{locations[2]},{thermals[0]},{thermals[1]},{thermals[2]}");
+            string line = $"{responseParticipantNumber},{responseTrialNumber},{feltThermal}";
+            for (int i = 0; i < locations.Count; i++)
+            {
+                line += $",{locations[i]}";
+            }
+            writer.WriteLine();
         }
         Console.WriteLine($"Wrote trial {responseTrialNumber} to CSV.");
     }

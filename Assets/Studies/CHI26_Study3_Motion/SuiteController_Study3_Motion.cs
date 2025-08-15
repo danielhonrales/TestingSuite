@@ -22,8 +22,8 @@ public class SuiteController_Study3_Motion : SuiteController
         string[] responseArray = PadResponseArray(responseParams, 4);
         int responseParticipantNumber = int.Parse(responseArray[0]);
         int responseTrialNumber = int.Parse(responseArray[1]);
-        string feltMotion = responseArray[2];
-        string thermal = responseArray[3];
+        string feltThermal = responseArray[2];
+        string feltMotion = responseArray[3];
 
         string filePath = string.Format("{0}\\trial_responses\\p{1}_response.csv", studyFolder, responseParticipantNumber);
         string directory = Path.GetDirectoryName(filePath);
@@ -37,9 +37,9 @@ public class SuiteController_Study3_Motion : SuiteController
         {
             if (!fileExists)
             {
-                writer.WriteLine("participantNumber,trialNumber,feltMotion,thermal");
+                writer.WriteLine("participantNumber,trialNumber,feltThermal,feltMotion");
             }
-            writer.WriteLine($"{responseParticipantNumber},{responseTrialNumber},{feltMotion},{thermal}");
+            writer.WriteLine($"{responseParticipantNumber},{responseTrialNumber},{feltThermal},{feltMotion}");
         }
         Console.WriteLine($"Wrote trial {responseTrialNumber} to CSV.");
     }

@@ -29,8 +29,8 @@ block_factor = None
 repetitions = 3
 
 # Participants
-num_participants = 3
-first_par = 21
+num_participants = 16
+first_par = 1
 
 # Create the output folder
 output_folder = 'Assets/Studies/CHI26_Study1_Funneling/trial_info'

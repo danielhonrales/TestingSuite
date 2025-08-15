@@ -19,13 +19,14 @@ public class ToolController : MonoBehaviour
     public float waitTime;
     public float restTime;
 
+    public bool skipThermalOnNeutral;
     public bool testing = false;
     public bool starting = false;
 
     // Start is called before the first frame update
     void Start()
     {
-
+        skipThermalOnNeutral = false;
     }
 
     // Update is called once per frame
@@ -88,14 +89,12 @@ public class ToolController : MonoBehaviour
     {
         responseScreens[currentQuestion].SetActive(false);
 
-        if (currentQuestion < responseScreens.Count - 1)
-        {
+        if ((currentQuestion < responseScreens.Count - 1) || (currentQuestion < responseScreens.Count - 2 && skipThermalOnNeutral)) {
+            skipThermalOnNeutral = false;
+            EndTrial();
+        } else {
             currentQuestion++;
             responseScreens[currentQuestion].SetActive(true);
-        }
-        else
-        {
-            EndTrial();
         }
     }
 
@@ -104,6 +103,11 @@ public class ToolController : MonoBehaviour
         responseScreens[currentQuestion].SetActive(false);
         currentQuestion = responseScreens.Count - 1;
         responseScreens[currentQuestion].SetActive(true);
+    }
+
+    public void SkipThermalOnNeutral()
+    {
+        skipThermalOnNeutral = true;
     }
 
     public void EndTrial()

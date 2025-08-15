@@ -1,22 +1,25 @@
+using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SaltationQ2 : MonoBehaviour
 {
 
-    public string thermal1;
-    public string thermal2;
-    public string thermal3;
-
-    public GameObject thermal1UI;
-    public GameObject thermal2UI;
-    public GameObject thermal3UI;
-
+    public List<string> locations;
+    public Slider slider;
+    public Transform sliderContainer;
+    public GameObject sliderPrefab;
+    public GameObject icon;
+    public TMP_Text numberText;
+    public TMP_Text countText;
     public ToolController toolController;
+
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        ResetQ2();
+        locations = new();
     }
 
     // Update is called once per frame
@@ -25,44 +28,53 @@ public class SaltationQ2 : MonoBehaviour
 
     }
 
-    public void SelectThermal1(string thermal)
+    void OnEnable()
     {
-        thermal1 = thermal;
-        thermal1UI.SetActive(false);
-        RecordResponse();
+        ResetQuestion();
     }
 
-    public void SelectThermal2(string thermal)
+    public void DisableIcon()
     {
-        thermal2 = thermal;
-        thermal2UI.SetActive(false);
-        RecordResponse();
+        icon.SetActive(false);
     }
 
-    public void SelectThermal3(string thermal)
+    public void RecordLocation()
     {
-        thermal3 = thermal;
-        thermal3UI.SetActive(false);
-        RecordResponse();
+        locations.Add(slider.value.ToString());
+        slider.value = 0;
+
+        CreateQ3Slider();
+        numberText.text = "Now marking sensation #" + (locations.Count + 1).ToString();
+        countText.text = "You have marked " + locations.Count.ToString() + " sensations.";
     }
 
     public void RecordResponse()
     {
-        if (!thermal1UI.activeSelf && !thermal2UI.activeSelf && !thermal3UI.activeSelf)
+        toolController.RecordTrialResponse(locations.Count.ToString());
+        foreach (string val in locations)
         {
-            toolController.RecordTrialResponse($"[{thermal1}|{thermal2}|{thermal3}]");
-            toolController.NextQuestion();
-            ResetQ2();
+            toolController.RecordTrialResponse(val);
         }
+        toolController.NextQuestion();
     }
 
-    public void ResetQ2()
+    public void CreateQ3Slider()
     {
-        thermal1 = "";
-        thermal2 = "";
-        thermal3 = "";
-        thermal1UI.SetActive(true);
-        thermal2UI.SetActive(true);
-        thermal3UI.SetActive(true);
+        GameObject newSlider = Instantiate(sliderPrefab, sliderContainer);
+        newSlider.GetComponent<Slider>().interactable = true;
+        newSlider.GetComponent<Slider>().value = slider.value;
+        newSlider.GetComponent<Slider>().interactable = false;
+    }
+
+
+    public void ResetQuestion()
+    {
+        locations = new();
+        foreach (Transform child in sliderContainer)
+        {
+            Destroy(child.gameObject);
+        }
+        numberText.text = "Now marking sensation #" + (locations.Count + 1).ToString();
+        countText.text = "You have marked " + locations.Count.ToString() + " sensations.";
     }
 }

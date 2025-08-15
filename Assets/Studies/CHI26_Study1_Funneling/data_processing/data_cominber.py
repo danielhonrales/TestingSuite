@@ -50,7 +50,7 @@ for key in common_keys:
     combined = combined[cols]
 
     # Rename Headers
-    combined.columns = ['Participant', 'Trial', 'Temperature', 'Duration', 'Location', 'FeltLocation', 'FeltThermal', 'FeltIllusion']
+    combined.columns = ['Participant', 'Trial', 'Temperature', 'Duration', 'Location', 'FeltThermal', 'FeltLocation']
 
     # Save combined result
     out_path = os.path.join(output_folder, f"{key}_data.xlsx")
