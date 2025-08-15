@@ -6,7 +6,7 @@ public static class ThermalVoltageMapping
     {
         {42,     1.2f},
         {41,     1.6f},
-        {40,     1.35f},
+        {40,     1.4f},
         {39,     1.5f},
         {38,     1.65f},
         {37,     1.3f},
