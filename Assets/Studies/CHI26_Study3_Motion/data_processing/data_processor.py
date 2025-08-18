@@ -11,140 +11,63 @@ from scipy.ndimage import gaussian_filter
 import random
 import os
 
-participants = [17, 18, 19 , 20]
-feltIllusions = [1, 0]
-locations = [0, 0.25, 0.5, 0.75, 1.0]
+participants = [1]
 temperatures = [9, -15]
+directions =  [1, 0]
+durations = [0.1, 1, 2]
+
+parent_folder = 'Assets/Studies/CHI26_Study3_Motion'
 
 def main():
     # --- Configuration ---
-    input_folder = 'Assets/Studies/CHI26_Study1_Funneling/data_processing/data'         # <-- UPDATE THIS
-    output_folder = 'Assets/Studies/CHI26_Study1_Funneling/data_processing/output'        # <-- UPDATE THIS
-    sheet_name = 0  # Use 0 for the first sheet, or specify by name
+    input_folder = f'{parent_folder}/data_processing/data'
+    output_folder = f'{parent_folder}/data_processing/output'
     os.makedirs(output_folder, exist_ok=True)
 
-    master_data = np.array((1, 8))
-
-    # Participant, Trial, Temperature, Duration, Location, FeltLocation, FeltTemperature, FeltIllusion x 180 trials
-    data_shape = np.array((180, 8))
-
-    """ for feltIllusion in feltIllusions:
-        for temperature in temperatures:
-            for location in locations:
-                process_data(input_folder, sheet_name, participants, feltIllusion, temperature, location)
-                for participant in participants:
-                    process_data(input_folder, sheet_name, [participant], feltIllusion, temperature, location) """
-    
-    """ for feltIllusion in feltIllusions:
-        for temperature in temperatures:
-            process_all_data(input_folder, sheet_name, participants, feltIllusion, temperature)
-            for participant in participants:
-                process_all_data(input_folder, sheet_name, [participant], feltIllusion, temperature) """
-    
     for temperature in temperatures:
-        for location in locations:
-            process_all_feltIllusions_data(input_folder, sheet_name, participants, temperature, location)
-            for participant in participants:
-                process_all_feltIllusions_data(input_folder, sheet_name, [participant], temperature, location)
+        for direction in directions:
+            for duration in durations:
+                filename = f"p{participants[0]}-p{participants[-1]}_temp-{temperature}_dir-{direction}_dur-{duration}.png"
+                process_data(input_folder, output_folder, participants, filename, temperature, direction, duration)
 
-def process_data(input_folder, sheet_name, participants, feltIllusion, temperature, location):
+                for participant in participants:
+                    filename = f"p{participant}_temp-{temperature}_dir-{direction}_dur-{duration}.png"
+                    process_data(input_folder, output_folder, participants, filename, temperature, direction, duration)
+
+def process_data(input_folder, output_folder, participants, filename, temperature, direction, duration):
     valid_trials = {}
     for par in participants:
         valid_trials[par] = []
 
     # --- Loop through Excel files ---
-    for filename in os.listdir(input_folder):
+    for data_file in os.listdir(input_folder):
         
-        if filename.endswith(('.xlsx', '.xls')) and not filename.startswith("~"):
-            file_participant = int(filename.strip("p").strip("_data.xlsx"))
+        if data_file.endswith(('.xlsx', '.xls')) and not data_file.startswith("~"):
+            file_participant = int(data_file.strip("p").strip("_data.xlsx"))
             if file_participant in participants:
-                file_path = os.path.join(input_folder, filename)
-
-                # Read Excel file
-                df = pd.read_excel(file_path, sheet_name=sheet_name)
-                print(f"Loaded: {filename} with shape {df.shape}")
-
-                condition = (
-                    (df["FeltIllusion"] == feltIllusion) &
-                    (df["Temperature"] == temperature) &
-                    (np.sign(df["Temperature"]) == np.sign(df["FeltThermal"])) &
-                    (abs(df["Location"] - df["FeltLocation"]) < 0.25) &
-                    (df["Location"] == location)
-                )
-
-                valid_trials[file_participant] = df[condition]['Trial'].tolist()
-                print(valid_trials)
-
-    
-    generate_heatmap(valid_trials, "Assets/Studies/CHI26_Study1_Funneling/drawings", participants, feltIllusion, temperature, location)
-
-def process_all_feltIllusions_data(input_folder, sheet_name, participants, temperature, location):
-    valid_trials = {}
-    for par in participants:
-        valid_trials[par] = []
-
-    # --- Loop through Excel files ---
-    for filename in os.listdir(input_folder):
-        
-        if filename.endswith(('.xlsx', '.xls')) and not filename.startswith("~"):
-            file_participant = int(filename.strip("p").strip("_data.xlsx"))
-            if file_participant in participants:
-                file_path = os.path.join(input_folder, filename)
+                file_path = os.path.join(input_folder, data_file)
 
                 try:
                     # Read Excel file
-                    df = pd.read_excel(file_path, sheet_name=sheet_name)
-                    print(f"Loaded: {filename} with shape {df.shape}")
+                    df = pd.read_excel(file_path, sheet_name=0)
+                    #print(f"Loaded: {filename} with shape {df.shape}")                    
 
                     condition = (
                         (df["Temperature"] == temperature) &
                         (np.sign(df["Temperature"]) == np.sign(df["FeltThermal"])) &
-                        (abs(df["Location"] - df["FeltLocation"]) < 0.25) &
-                        (df["Location"] == location)
+                        (df["Direction"] == direction) &
+                        (df["Duration"] == duration)
                     )
 
                     valid_trials[file_participant] = df[condition]['Trial'].tolist()
-                    print(valid_trials)
+                    #print(valid_trials)
 
                 except Exception as e:
-                    print(f"❌ Failed to process {filename}: {e}")
+                    print(f"❌ Failed to process {data_file}: {e}")
     
-    generate_heatmap(valid_trials, "Assets/Studies/CHI26_Study1_Funneling/drawings", participants, "all", temperature, location)
+    generate_heatmap(output_folder, valid_trials, temperature, filename)
 
-def process_all_locations_data(input_folder, sheet_name, participants, feltIllusion, temperature):
-    valid_trials = {}
-    for par in participants:
-        valid_trials[par] = []
-
-    # --- Loop through Excel files ---
-    for filename in os.listdir(input_folder):
-        
-        if filename.endswith(('.xlsx', '.xls')) and not filename.startswith("~"):
-            file_participant = int(filename.strip("p").strip("_data.xlsx"))
-            if file_participant in participants:
-                file_path = os.path.join(input_folder, filename)
-
-                try:
-                    # Read Excel file
-                    df = pd.read_excel(file_path, sheet_name=sheet_name)
-                    print(f"Loaded: {filename} with shape {df.shape}")
-
-                    condition = (
-                        (df["FeltIllusion"] == feltIllusion) &
-                        (df["Temperature"] == temperature) &
-                        (np.sign(df["Temperature"]) == np.sign(df["FeltThermal"])) &
-                        (abs(df["Location"] - df["FeltLocation"]) < 0.25) #&
-                    )
-
-                    valid_trials[file_participant] = df[condition]['Trial'].tolist()
-                    print(valid_trials)
-
-                except Exception as e:
-                    print(f"❌ Failed to process {filename}: {e}")
-    
-    generate_heatmap(valid_trials, "Assets/Studies/CHI26_Study1_Funneling/drawings", participants, feltIllusion, temperature, "all")
-
-def generate_heatmap(trials_to_process, drawings_folder, participants, feltIllusion, temperature, location):
+def generate_heatmap(output_folder, trials_to_process, temperature, filename):
     mask_filepath = f"Assets/arm_mask.png"
     mask_img = Image.open(mask_filepath).convert("L")
     mask_array = np.array(mask_img)
@@ -155,7 +78,7 @@ def generate_heatmap(trials_to_process, drawings_folder, participants, feltIllus
     heat_map = np.zeros(mask_array.shape)
 
     for par in trials_to_process:
-        par_folder = os.path.join(drawings_folder, f"p{par}")
+        par_folder = os.path.join(f"{parent_folder}/drawings/", f"p{par}")
         for trial in trials_to_process[par]:
             filepath = os.path.join(par_folder, f"p{par}_trial{trial}_drawing.png")
             heat_map = process_drawing(filepath, heat_map)
@@ -202,16 +125,9 @@ def generate_heatmap(trials_to_process, drawings_folder, participants, feltIllus
                     linewidth=1.5, edgecolor='gray', facecolor='gray', alpha=0.8)
     ax.add_patch(rect)
 
-    folder = drawings_folder
-    if feltIllusion == "all":
-        new_filepath = os.path.join(folder, f"heatmap_allillusion_temperature-{temperature}_par{participants[0]}-par{participants[-1]}_location-{int(location * 100)}")
-    else:
-        if location == 'all':
-            new_filepath = os.path.join(folder, f"heatmap_noillusion_par{participants[0]}-par{participants[-1]}_location-all")
-        else:
-            new_filepath = os.path.join(folder, f"heatmap_{'illusion' if feltIllusion else 'noillusion'}_temperature-{temperature}_par{participants[0]}-par{participants[-1]}_location-{int(location * 100)}")
-    plt.savefig(new_filepath, dpi=300, bbox_inches='tight')
-    print(f"Saved to {new_filepath}")
+    file_path = os.path.join(output_folder, filename)
+    plt.savefig(file_path, dpi=300, bbox_inches='tight')
+    print(f"Saved to {file_path}")
 
 
 def process_drawing(filepath, heat_map):
