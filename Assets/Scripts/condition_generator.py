@@ -9,20 +9,20 @@ import os
     "Location": [0, 0.25, 0.5, 0.75, 1] """
 
 # Study 2
-""" "Temperature": [9, 6, 0, -12, -15],
-    "Duration": [0.1, 0.2, 0.3, 0.4, 0.5],
+""" "Temperature": [9, 0, -15],
+    "Duration": [0.1, 0.25, 0.5],
     "Direction": [0, 1] """
 
 # Study 3
-""" "Temperature": [9, 6, 0, -12, -15],
-    "Duration": [0.1, 0.5, 1.0, 1.5, 2.0],
+""" "Temperature": [9, 0, -15],
+    "Duration": [0.1, 1, 2],
     "Direction": [0, 1] """
 
 # Conditions
 factors = {
     "Temperature": [9, 0, -15],
     "Duration": [0.1, 1, 2],
-    "Location": [0, 0.25, 0.5, 0.75, 1]
+    "Direction": [0, 1]
 }
 
 block_factor = None
@@ -33,7 +33,7 @@ num_participants = 16
 first_par = 1
 
 # Create the output folder
-output_folder = 'Assets/Studies/CHI26_Study1_Funneling/trial_info'
+output_folder = 'Assets/Studies/CHI26_Study3_Motion/trial_info'
 os.makedirs(output_folder, exist_ok=True)
 
 # Generate all possible combinations
