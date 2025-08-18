@@ -19,7 +19,7 @@ public class SuiteController_Study2_Saltation : SuiteController
 
     public override void SaveTrialResponse(string[] responseParams)
     {
-        string[] responseArray = PadResponseArray(responseParams, 4);
+        string[] responseArray = responseParams;
         int responseParticipantNumber = int.Parse(responseArray[0]);
         int responseTrialNumber = int.Parse(responseArray[1]);
         int feltThermal = int.Parse(responseArray[2]);
