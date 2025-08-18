@@ -26,7 +26,7 @@ factors = {
 }
 
 block_factor = None
-repetitions = 3
+repetitions = 10
 
 # Participants
 num_participants = 16
