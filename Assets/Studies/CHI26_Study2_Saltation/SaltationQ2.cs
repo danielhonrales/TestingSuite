@@ -11,7 +11,6 @@ public class SaltationQ2 : MonoBehaviour
     public Transform sliderContainer;
     public GameObject sliderPrefab;
     public GameObject icon;
-    public TMP_Text numberText;
     public TMP_Text countText;
     public ToolController toolController;
 
@@ -43,8 +42,9 @@ public class SaltationQ2 : MonoBehaviour
         locations.Add(slider.value.ToString());
 
         CreateQ3Slider();
-        numberText.text = "Now marking sensation #" + (locations.Count + 1).ToString();
         countText.text = "You have marked " + locations.Count.ToString() + " sensations.";
+
+        slider.value = 0;
     }
 
     public void RecordResponse()
@@ -73,7 +73,6 @@ public class SaltationQ2 : MonoBehaviour
         {
             Destroy(child.gameObject);
         }
-        numberText.text = "Now marking sensation #" + (locations.Count + 1).ToString();
         countText.text = "You have marked " + locations.Count.ToString() + " sensations.";
         slider.value = 0;
     }

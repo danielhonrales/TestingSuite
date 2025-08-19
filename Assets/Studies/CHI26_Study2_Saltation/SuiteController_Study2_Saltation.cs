@@ -19,7 +19,7 @@ public class SuiteController_Study2_Saltation : SuiteController
 
     public override void SaveTrialResponse(string[] responseParams)
     {
-        string[] responseArray = PadResponseArray(responseParams, 4);
+        string[] responseArray = responseParams;
         int responseParticipantNumber = int.Parse(responseArray[0]);
         int responseTrialNumber = int.Parse(responseArray[1]);
         int feltThermal = int.Parse(responseArray[2]);
@@ -45,12 +45,12 @@ public class SuiteController_Study2_Saltation : SuiteController
             {
                 writer.WriteLine("participantNumber,trialNumber,feltThermal,numberOfLocations,location1,location2,location3,extraLocations");
             }
-            string line = $"{responseParticipantNumber},{responseTrialNumber},{feltThermal}";
+            string line = $"{responseParticipantNumber},{responseTrialNumber},{feltThermal},{numberOfLocations}";
             for (int i = 0; i < locations.Count; i++)
             {
                 line += $",{locations[i]}";
             }
-            writer.WriteLine();
+            writer.WriteLine(line);
         }
         Console.WriteLine($"Wrote trial {responseTrialNumber} to CSV.");
     }

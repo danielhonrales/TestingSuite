@@ -89,11 +89,14 @@ public class ToolController : MonoBehaviour
     {
         responseScreens[currentQuestion].SetActive(false);
 
-        if ((currentQuestion < responseScreens.Count - 1) || (currentQuestion < responseScreens.Count - 2 && skipThermalOnNeutral)) {
+        currentQuestion++;
+        if ((currentQuestion > responseScreens.Count - 1) || (currentQuestion > responseScreens.Count - 2 && skipThermalOnNeutral))
+        {
             skipThermalOnNeutral = false;
             EndTrial();
-        } else {
-            currentQuestion++;
+        }
+        else
+        {
             responseScreens[currentQuestion].SetActive(true);
         }
     }
