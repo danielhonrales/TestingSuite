@@ -41,7 +41,6 @@ public class SaltationQ2 : MonoBehaviour
     public void RecordLocation()
     {
         locations.Add(slider.value.ToString());
-        slider.value = 0;
 
         CreateQ3Slider();
         numberText.text = "Now marking sensation #" + (locations.Count + 1).ToString();
@@ -76,5 +75,6 @@ public class SaltationQ2 : MonoBehaviour
         }
         numberText.text = "Now marking sensation #" + (locations.Count + 1).ToString();
         countText.text = "You have marked " + locations.Count.ToString() + " sensations.";
+        slider.value = 0;
     }
 }
