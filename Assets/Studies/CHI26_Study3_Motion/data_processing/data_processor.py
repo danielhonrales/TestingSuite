@@ -84,9 +84,9 @@ def generate_heatmap(output_folder, trials_to_process, temperature, filename):
             heat_map = process_drawing(filepath, heat_map)
 
     # Shift
-    n_pixels = 50
+    """ n_pixels = 50
     heat_map = np.roll(heat_map, shift=-n_pixels, axis=1)
-    heat_map[:, -n_pixels:] = 0
+    heat_map[:, -n_pixels:] = 0 """
     
     sigma = 1
     heat_map = gaussian_filter(heat_map, sigma=sigma)

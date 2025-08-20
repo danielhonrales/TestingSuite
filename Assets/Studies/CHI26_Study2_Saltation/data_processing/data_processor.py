@@ -11,12 +11,12 @@ from scipy.ndimage import gaussian_filter
 import random
 import os
 
-participants = [1]
+participants = [1, 2]
 temperatures = [9, -15]
 directions =  [1, 0]
-durations = [0.1, 1, 2]
+durations = [0.1, .25, .5]
 
-parent_folder = 'Assets/Studies/CHI26_Study3_Motion'
+parent_folder = 'Assets/Studies/CHI26_Study2_Saltation'
 
 def main():
     # --- Configuration ---
@@ -27,12 +27,12 @@ def main():
     for temperature in temperatures:
         for direction in directions:
             for duration in durations:
-                filename = f"p{participants[0]}-p{participants[-1]}_temp-{temperature}_dir-{direction}_dur-{duration}.png"
+                filename = f"p{participants[0]}-p{participants[-1]}_temp-{temperature}_dur-{duration}_dir-{direction}.png"
                 process_data(input_folder, output_folder, participants, filename, temperature, direction, duration)
 
-                for participant in participants:
-                    filename = f"p{participant}_temp-{temperature}_dir-{direction}_dur-{duration}.png"
-                    process_data(input_folder, output_folder, participants, filename, temperature, direction, duration)
+                """ for participant in participants:
+                    filename = f"p{participant}_temp-{temperature}_dur-{duration}_dir-{direction}.png"
+                    process_data(input_folder, output_folder, participants, filename, temperature, direction, duration) """
 
 def process_data(input_folder, output_folder, participants, filename, temperature, direction, duration):
     valid_trials = {}
@@ -55,6 +55,7 @@ def process_data(input_folder, output_folder, participants, filename, temperatur
                     condition = (
                         (df["Temperature"] == temperature) &
                         (np.sign(df["Temperature"]) == np.sign(df["FeltThermal"])) &
+                        (df["numLocation"] == 3) &
                         (df["Direction"] == direction) &
                         (df["Duration"] == duration)
                     )
@@ -84,9 +85,9 @@ def generate_heatmap(output_folder, trials_to_process, temperature, filename):
             heat_map = process_drawing(filepath, heat_map)
 
     # Shift
-    n_pixels = 50
-    heat_map = np.roll(heat_map, shift=-n_pixels, axis=1)
-    heat_map[:, -n_pixels:] = 0
+    #n_pixels = 0
+    #heat_map = np.roll(heat_map, shift=-n_pixels, axis=1)
+    #heat_map[:, -n_pixels:] = 0
     
     sigma = 1
     heat_map = gaussian_filter(heat_map, sigma=sigma)
