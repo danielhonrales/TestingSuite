@@ -11,7 +11,7 @@ from scipy.ndimage import gaussian_filter
 import random
 import os
 
-participants = [1, 2]
+participants = [1, 2, 3, 4]
 temperatures = [9, -15]
 directions =  [1, 0]
 durations = [0.1, 1, 2]
@@ -30,9 +30,9 @@ def main():
                 filename = f"p{participants[0]}-p{participants[-1]}_temp-{temperature}_dir-{direction}_dur-{duration}.png"
                 process_data(input_folder, output_folder, participants, filename, temperature, direction, duration)
 
-                for participant in participants:
+                """ for participant in participants:
                     filename = f"p{participant}_temp-{temperature}_dir-{direction}_dur-{duration}.png"
-                    process_data(input_folder, output_folder, participants, filename, temperature, direction, duration)
+                    process_data(input_folder, output_folder, participants, filename, temperature, direction, duration) """
 
 def process_data(input_folder, output_folder, participants, filename, temperature, direction, duration):
     valid_trials = {}
@@ -127,12 +127,16 @@ def generate_heatmap(output_folder, trials_to_process, temperature, filename):
 
     file_path = os.path.join(output_folder, filename)
     plt.savefig(file_path, dpi=300, bbox_inches='tight')
-    print(f"Saved to {file_path}")
+    print(f"Saved to {file_path} with {sum(len(par) for par in trials_to_process.values())} files processed")
+    for par in trials_to_process:
+        print(f"\t{par}: {trials_to_process[par]}")
+
+    plt.close()
 
 
 def process_drawing(filepath, heat_map):
     if os.path.isfile(filepath):
-        print(f"Processing {filepath}")
+        #print(f"Processing {filepath}")
     #if os.path.isfile(filepath) and "Am19_thermal" in filename:
         # Convert png to array
         fill_red_circles(filepath, filepath)
@@ -177,7 +181,7 @@ def fill_red_circles(image_path, save_path=None):
 
     # Save or return result
     if save_path:
-        print(f"Saving to {save_path}")
+        #print(f"Saving to {save_path}")
         cv2.imwrite(save_path, img)
     return img
 
