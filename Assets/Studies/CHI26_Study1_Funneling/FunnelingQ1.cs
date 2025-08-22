@@ -47,6 +47,6 @@ public class FunnelingQ1 : MonoBehaviour
 
     public void ResetQuestion()
     {
-        slider.value = 0;
+        slider.value = 0.5f;
     }
 }
