@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import os
 
 def main():
-    participants = [5]
+    participants = [1,2,5,7]
     parent_folder = 'Assets/Studies/CHI26_Study1_Funneling'
     input_folder = f'{parent_folder}/data_processing/data'
     output_folder = f'{parent_folder}/data_processing/analysis/{participant_string(participants)}'
