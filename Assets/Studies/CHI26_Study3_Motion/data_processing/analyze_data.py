@@ -37,10 +37,7 @@ def process_participant_data(folder_path, participants, output_folder):
             df["Participant"] = p
 
             # Compute new columns
-            df["ThermalMatch"] = (
-                (df["Temperature"].apply(lambda x: 1 if x > 0 else (-1 if x < 0 else 0))) ==
-                (df["FeltThermal"].apply(lambda x: 1 if x > 0 else (-1 if x < 0 else 0)))
-            ).astype(int)
+            df["ThermalMatch"] = (np.sign(df["Temperature"]) == np.sign(df["FeltThermal"])).astype(int)
 
             df["DirectionMatch"] = (df["Direction"] == df["FeltDirection"]).astype(int)
 
@@ -110,13 +107,13 @@ def generate_graph(df, excel_file, output_folder):
         width = 0.7 / len(durations)   # shrink from 0.8 to 0.7 for some gap
         spacing = 0.1
 
-        for i, dur in enumerate(durations):
-            data_dur = data_dir[data_dir["Duration"] == dur]
+        for i, temp in enumerate(temperatures):
+            data_temp = data_dir[data_dir["Temperature"] == temp]
 
             means = []
             sems = []
-            for temp in temperatures:
-                row = data_dur[data_dur["Temperature"] == temp]
+            for dur in durations:
+                row = data_temp[data_temp["Duration"] == dur]
                 if not row.empty:
                     means.append(row["FeltMotion_mean"].values[0])
                     sems.append(row["FeltMotion_sem"].values[0])
@@ -126,20 +123,20 @@ def generate_graph(df, excel_file, output_folder):
 
             # Center bars around each temperature, add small separation
             positions = (
-                x + (i - (len(durations)-1)/2) * (width + spacing/len(durations))
+                x + (i - (len(temperatures)-1)/2) * (width + spacing/len(temperatures))
             )
 
             ax.bar(positions, means, width, yerr=sems,
-                   color=[temp_colors[t] for t in temperatures],
-                   capsize=4, label=f"Duration {dur}")
+                   color=[temp_colors[temp]],
+                   capsize=4, label=f"Temp {temp}")
 
         ax.set_xticks(x)
-        ax.set_xticklabels([str(t) for t in temperatures])
-        ax.set_xlabel("Temperature")
+        ax.set_xticklabels([str(dur) for dur in durations])
+        ax.set_xlabel("Duration")
         ax.set_ylabel("P(Felt Motion)")
         ax.set_ylim(0, 1.05)
         ax.set_title(f"Direction = {direction}")
-        ax.legend(title="Duration")
+        ax.legend(title="Temperature")
         ax.grid(True, axis="y", linestyle="--", alpha=0.5)
 
         outpath = os.path.join(output_folder, f"bar_direction_{direction}.png")

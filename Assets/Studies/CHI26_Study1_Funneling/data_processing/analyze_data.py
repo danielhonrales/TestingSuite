@@ -4,7 +4,7 @@ import os
 import numpy as np
 
 def main():
-    participants = [9]
+    participants = [1,2,3,5,7,9]
     parent_folder = 'Assets/Studies/CHI26_Study1_Funneling'
     input_folder = f'{parent_folder}/data_processing/data'
     output_folder = f'{parent_folder}/data_processing/analysis/{participant_string(participants)}'
@@ -37,10 +37,7 @@ def process_participant_data(folder_path, participants, output_folder):
             df["Participant"] = p
 
             # Compute new columns
-            df["ThermalMatch"] = (
-                (df["Temperature"].apply(lambda x: 1 if x > 0 else (-1 if x < 0 else 0))) ==
-                (df["FeltThermal"].apply(lambda x: 1 if x > 0 else (-1 if x < 0 else 0)))
-            ).astype(int)
+            df["ThermalMatch"] = (np.sign(df["Temperature"]) == np.sign(df["FeltThermal"])).astype(int)
 
             df["LocationError"] = df["Location"] - df["FeltLocation"]
 
