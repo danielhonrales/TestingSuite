@@ -1,9 +1,10 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
+import numpy as np
 
 def main():
-    participants = [1,2,5,7]
+    participants = [9]
     parent_folder = 'Assets/Studies/CHI26_Study1_Funneling'
     input_folder = f'{parent_folder}/data_processing/data'
     output_folder = f'{parent_folder}/data_processing/analysis/{participant_string(participants)}'
@@ -68,23 +69,29 @@ def process_participant_data(folder_path, participants, output_folder):
 def generate_graph(df, excel_file, output_folder):
     """
     Creates scatterplots of Intended Location vs. average FeltLocation,
-    grouped by Temperature. 
-    - One plot per Duration, plus one with all durations (separate images)
-    - One combined figure with subplots (horizontal row)
-    - One combined figure with subplots (2x2 grid)
+    grouped by Temperature. One plot per Duration, plus one with all durations.
     Excludes rows where ThermalMatch == 0.
+    Saves both individual plots and one combined subplot figure.
     """
-    import matplotlib.pyplot as plt
-    import pandas as pd
-    import os
-
     # ✅ Keep only trials where ThermalMatch == 1
     df = df[df["ThermalMatch"] == 1]
 
-    # Compute mean FeltLocation per (Location, Temperature, Duration)
-    grouped = (df.groupby(["Location", "Temperature", "Duration"])
-                 ["FeltLocation"].mean()
-                 .reset_index())
+    # Compute mean + SEM (safe SEM to avoid NaN)
+    grouped = (
+        df.groupby(["Location", "Temperature", "Duration"])
+          .agg(FeltLocation_mean=("FeltLocation", "mean"),
+               FeltLocation_sem=("FeltLocation",
+                                 lambda x: 0 if len(x) <= 1 else x.std(ddof=1) / np.sqrt(len(x))))
+          .reset_index()
+    )
+
+    grouped_all = (
+        df.groupby(["Location", "Temperature"])
+          .agg(FeltLocation_mean=("FeltLocation", "mean"),
+               FeltLocation_sem=("FeltLocation",
+                                 lambda x: 0 if len(x) <= 1 else x.std(ddof=1) / np.sqrt(len(x))))
+          .reset_index()
+    )
 
     # Define colors/markers per Temperature
     temp_styles = {
@@ -93,26 +100,35 @@ def generate_graph(df, excel_file, output_folder):
         9:  {"color": "red", "marker": "o", "label": "Hot"}
     }
 
+    # Define offsets for each temperature so points don't overlap on x-axis
+    temp_offsets = {
+        -15: -0.02,   # Cold (shift left)
+        0:    0.0,    # No Thermal (centered)
+        9:   +0.02    # Hot (shift right)
+    }
+
     # Durations to plot (unique + "all")
     durations = sorted(df["Duration"].unique())
     durations.append("all")
 
     tables_to_save = {}
+    figs = []  # store individual figure paths
 
-    # === INDIVIDUAL PLOTS (same as your version) ===
+    # === Individual plots ===
     for dur in durations:
         if dur == "all":
-            data = (df.groupby(["Location", "Temperature"])
-                      ["FeltLocation"].mean()
-                      .reset_index())
+            data = grouped_all.copy()
             title = "All Durations"
             fname = "scatter_all_durations.png"
             sheet_name = "AllDurations"
         else:
-            data = grouped[grouped["Duration"] == dur]
+            data = grouped[grouped["Duration"] == dur].copy()
             title = f"Duration = {dur}s"
             fname = f"scatter_duration_{dur}.png"
             sheet_name = f"Duration_{dur}"
+
+        # Clean NaNs
+        data = data.dropna(subset=["FeltLocation_mean", "FeltLocation_sem"])
 
         tables_to_save[sheet_name] = data.copy()
 
@@ -120,16 +136,17 @@ def generate_graph(df, excel_file, output_folder):
         for temp, style in temp_styles.items():
             temp_data = data[data["Temperature"] == temp]
             if not temp_data.empty:
-                plt.scatter(temp_data["Location"], temp_data["FeltLocation"],
-                            color=style["color"], marker=style["marker"],
-                            s=80, label=style["label"])
-                # Labels
+                x_vals = temp_data["Location"] + temp_offsets[temp]
+                plt.errorbar(x_vals, temp_data["FeltLocation_mean"],
+                                yerr=temp_data["FeltLocation_sem"],
+                                fmt=style["marker"], color=style["color"],
+                                capsize=4, markersize=8, label=style["label"])
+                """ # Add labels at shifted x too
                 for _, row in temp_data.iterrows():
-                    plt.text(row["Location"], row["FeltLocation"],
-                             f"{row['FeltLocation']:.2f}",
-                             fontsize=8, ha="center", va="bottom")
+                    plt.text(row["Location"] + temp_offsets[temp], row["FeltLocation_mean"],
+                                f"{row['FeltLocation_mean']:.2f}",
+                                fontsize=8, ha="center", va="bottom") """
 
-        plt.plot([0, 1], [0, 1], "k--", alpha=0.5)  # reference line
         plt.title(title)
         plt.xlabel("Intended Location")
         plt.ylabel("Perceived Location (avg)")
@@ -144,103 +161,74 @@ def generate_graph(df, excel_file, output_folder):
         outpath = os.path.join(output_folder, fname)
         plt.savefig(outpath, dpi=300, bbox_inches="tight")
         plt.close()
+        figs.append((title, outpath))
         print(f"Saved plot: {outpath}")
 
-    # === COMBINED SUBPLOTS (horizontal row) ===
-    fig, axes = plt.subplots(1, len(durations), figsize=(6 * len(durations), 5), sharex=True, sharey=True)
-    if len(durations) == 1:
-        axes = [axes]
+   # === Combined subplot figure ===
+    nrows = 2
+    ncols = int(np.ceil(len(durations) / nrows))
+    fig, axes = plt.subplots(nrows, ncols, figsize=(5*ncols, 5*nrows), squeeze=False)
 
-    for ax, dur in zip(axes, durations):
+    for idx, dur in enumerate(durations):
+        ax = axes[idx // ncols, idx % ncols]
+
         if dur == "all":
-            data = (df.groupby(["Location", "Temperature"])
-                      ["FeltLocation"].mean()
-                      .reset_index())
+            data = grouped_all.copy()
             title = "All Durations"
         else:
-            data = grouped[grouped["Duration"] == dur]
+            data = grouped[grouped["Duration"] == dur].copy()
             title = f"Duration = {dur}s"
 
-        for temp, style in temp_styles.items():
-            temp_data = data[data["Temperature"] == temp]
-            if not temp_data.empty:
-                ax.scatter(temp_data["Location"], temp_data["FeltLocation"],
-                           color=style["color"], marker=style["marker"],
-                           s=80, label=style["label"])
-                for _, row in temp_data.iterrows():
-                    ax.text(row["Location"], row["FeltLocation"],
-                            f"{row['FeltLocation']:.2f}",
-                            fontsize=8, ha="center", va="bottom")
+        # Clean NaNs
+        data = data.dropna(subset=["FeltLocation_mean", "FeltLocation_sem"])
 
-        ax.plot([0, 1], [0, 1], "k--", alpha=0.5)
+        # ✅ Plot each temperature separately
+        for temp, style in temp_styles.items():
+            temp_data = data[data["Temperature"] == temp]   # <--- filter by temp
+            if temp_data.empty:
+                continue
+
+            # Apply small x-offset to avoid overlap
+            x_vals = temp_data["Location"] + temp_offsets[temp]
+
+            ax.errorbar(x_vals, temp_data["FeltLocation_mean"],
+                        yerr=temp_data["FeltLocation_sem"],
+                        fmt=style["marker"], color=style["color"],
+                        capsize=4, markersize=8, label=style["label"])
+
+            # Add labels at shifted x too
+            """ for _, row in temp_data.iterrows():
+                ax.text(row["Location"] + temp_offsets[temp],
+                        row["FeltLocation_mean"],
+                        f"{row['FeltLocation_mean']:.2f}",
+                        fontsize=8, ha="center", va="bottom") """
+
         ax.set_title(title)
         ax.set_xlabel("Intended Location")
+        ax.set_ylabel("Perceived Location (avg)")
         ax.set_xticks([0, 0.25, 0.5, 0.75, 1.0])
         ax.set_yticks([0, 0.25, 0.5, 0.75, 1.0])
         ax.set_xlim(-0.05, 1.05)
         ax.set_ylim(-0.05, 1.05)
         ax.grid(True, linestyle="--", alpha=0.5)
 
-    axes[0].set_ylabel("Perceived Location (avg)")
-    handles, labels = axes[-1].get_legend_handles_labels()
-    fig.legend(handles, labels, loc="lower center", ncol=3, bbox_to_anchor=(0.5, -0.05))
-    plt.tight_layout(rect=[0, 0.05, 1, 1])
-    combined_out = os.path.join(output_folder, "scatter_all_durations_horizontal.png")
-    plt.savefig(combined_out, dpi=300, bbox_inches="tight")
-    plt.close()
-    print(f"Saved combined horizontal subplot figure: {combined_out}")
+        if idx == 0:  # only put legend once
+            ax.legend()
+        # Hide unused axes
+        for j in range(len(durations), nrows*ncols):
+            fig.delaxes(axes[j // ncols, j % ncols])
 
-    # === COMBINED SUBPLOTS (2x2 grid) ===
-    n_plots = len(durations)
-    rows = 2
-    cols = (n_plots + 1) // 2
-    fig, axes = plt.subplots(rows, cols, figsize=(6 * cols, 5 * rows), sharex=True, sharey=True)
-    axes = axes.flatten()
+        combined_path = os.path.join(output_folder, "scatter_combined.png")
+        plt.tight_layout()
+        fig.savefig(combined_path, dpi=300, bbox_inches="tight")
+        plt.close()
+        print(f"Saved combined plot: {combined_path}")
 
-    for ax, dur in zip(axes, durations):
-        if dur == "all":
-            data = (df.groupby(["Location", "Temperature"])
-                      ["FeltLocation"].mean()
-                      .reset_index())
-            title = "All Durations"
-        else:
-            data = grouped[grouped["Duration"] == dur]
-            title = f"Duration = {dur}s"
-
-        for temp, style in temp_styles.items():
-            temp_data = data[data["Temperature"] == temp]
-            if not temp_data.empty:
-                ax.scatter(temp_data["Location"], temp_data["FeltLocation"],
-                           color=style["color"], marker=style["marker"],
-                           s=80, label=style["label"])
-                for _, row in temp_data.iterrows():
-                    ax.text(row["Location"], row["FeltLocation"],
-                            f"{row['FeltLocation']:.2f}",
-                            fontsize=8, ha="center", va="bottom")
-
-        ax.plot([0, 1], [0, 1], "k--", alpha=0.5)
-        ax.set_title(title)
-        ax.set_xlabel("Intended Location")
-        ax.set_xticks([0, 0.25, 0.5, 0.75, 1.0])
-        ax.set_yticks([0, 0.25, 0.5, 0.75, 1.0])
-        ax.set_xlim(-0.05, 1.05)
-        ax.set_ylim(-0.05, 1.05)
-        ax.grid(True, linestyle="--", alpha=0.5)
-
-    axes[0].set_ylabel("Perceived Location (avg)")
-    handles, labels = axes[-1].get_legend_handles_labels()
-    fig.legend(handles, labels, loc="lower center", ncol=3, bbox_to_anchor=(0.5, -0.05))
-    plt.tight_layout(rect=[0, 0.05, 1, 1])
-    combined_grid_out = os.path.join(output_folder, "scatter_all_durations_grid.png")
-    plt.savefig(combined_grid_out, dpi=300, bbox_inches="tight")
-    plt.close()
-    print(f"Saved combined 2x2 subplot figure: {combined_grid_out}")
-
-    # === SAVE DATA TABLES TO EXCEL ===
-    with pd.ExcelWriter(excel_file, mode="a", engine="openpyxl", if_sheet_exists="replace") as writer:
-        for sheet, table in tables_to_save.items():
-            table.to_excel(writer, sheet_name=sheet, index=False)
-    print(f"Saved graph data tables into {excel_file}")
+        # === Save data tables ===
+        with pd.ExcelWriter(excel_file, mode="a", engine="openpyxl", if_sheet_exists="replace") as writer:
+            for sheet, table in tables_to_save.items():
+                table.to_excel(writer, sheet_name=sheet, index=False)
+        print(f"Saved graph data tables into {excel_file}")
 
 def participant_string(participants):
     """
