@@ -72,6 +72,6 @@ public class SaltationQ2 : MonoBehaviour
             Destroy(child.gameObject);
         }
         countText.text = "You have marked " + locations.Count.ToString() + " sensations.";
-        slider.value = 0;
+        slider.value = 0.5f;
     }
 }

@@ -19,11 +19,12 @@ public class SuiteController_Study3_Motion : SuiteController
 
     public override void SaveTrialResponse(string[] responseParams)
     {
-        string[] responseArray = PadResponseArray(responseParams, 4);
+        string[] responseArray = PadResponseArray(responseParams, 5);
         int responseParticipantNumber = int.Parse(responseArray[0]);
         int responseTrialNumber = int.Parse(responseArray[1]);
         string feltThermal = responseArray[2];
         string feltMotion = responseArray[3];
+        string feltDirection = responseArray[4];
 
         string filePath = string.Format("{0}\\trial_responses\\p{1}_response.csv", studyFolder, responseParticipantNumber);
         string directory = Path.GetDirectoryName(filePath);
@@ -37,9 +38,9 @@ public class SuiteController_Study3_Motion : SuiteController
         {
             if (!fileExists)
             {
-                writer.WriteLine("participantNumber,trialNumber,feltThermal,feltMotion");
+                writer.WriteLine("participantNumber,trialNumber,feltThermal,feltMotion,feltDirection");
             }
-            writer.WriteLine($"{responseParticipantNumber},{responseTrialNumber},{feltThermal},{feltMotion}");
+            writer.WriteLine($"{responseParticipantNumber},{responseTrialNumber},{feltThermal},{feltMotion},{feltDirection}");
         }
         Console.WriteLine($"Wrote trial {responseTrialNumber} to CSV.");
     }
