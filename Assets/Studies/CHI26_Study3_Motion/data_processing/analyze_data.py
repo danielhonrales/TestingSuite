@@ -4,7 +4,7 @@ import os
 import numpy as np
 
 def main():
-    participants = [5]
+    participants = [1,2,3,4,5]
     parent_folder = 'Assets/Studies/CHI26_Study3_Motion'
     input_folder = f'{parent_folder}/data_processing/data'
     output_folder = f'{parent_folder}/data_processing/analysis/{participant_string(participants)}'

@@ -64,7 +64,31 @@ def delete_shifted_files(folder_path, keyword="shifted"):
             if os.path.isfile(file_path):
                 os.remove(file_path)
                 print(f"Deleted: {file_path}")
+                
+def flip_pngs_in_folder(input_folder, output_folder=None):
+    # If no output folder specified, overwrite in place
+    if output_folder is None:
+        output_folder = input_folder
+    else:
+        os.makedirs(output_folder, exist_ok=True)
+
+    for filename in os.listdir(input_folder):
+        if filename.lower().endswith(".png"):
+            input_path = os.path.join(input_folder, filename)
+            output_path = os.path.join(output_folder, filename)
+
+            # Open image
+            img = Image.open(input_path)
+
+            # Flip along vertical axis (left-right flip)
+            flipped_img = img.transpose(Image.FLIP_LEFT_RIGHT)
+
+            # Save flipped image
+            flipped_img.save(output_path)
+            print(f"Flipped: {filename}")
 
 #rename_files_in_folder("Assets\Studies\CHI26_Study1_Funneling\drawings\p20", 20, 1)
-shift_images_left("Assets\Studies\CHI26_Study1_Funneling\drawings\p1", shift_pixels=50)
-shift_images_left("Assets\Studies\CHI26_Study1_Funneling\drawings\p2", shift_pixels=50)
+#shift_images_left("Assets\Studies\CHI26_Study1_Funneling\drawings\p1", shift_pixels=50)
+#shift_images_left("Assets\Studies\CHI26_Study1_Funneling\drawings\p2", shift_pixels=50)
+#flip_pngs_in_folder("Assets\Studies\CHI26_Study1_Funneling\drawings\p4")
+shift_images_left("Assets\Studies\CHI26_Study1_Funneling\drawings\p4", shift_pixels=10)
