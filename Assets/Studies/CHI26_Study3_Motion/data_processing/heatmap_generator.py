@@ -11,7 +11,7 @@ from scipy.ndimage import gaussian_filter
 import random
 import os
 
-participants = [1, 2, 3, 4]
+participants = [1, 2, 3, 4, 5]
 temperatures = [9, -15]
 directions =  [1, 0]
 durations = [0.1, 1, 2]
@@ -21,7 +21,7 @@ parent_folder = 'Assets/Studies/CHI26_Study3_Motion'
 def main():
     # --- Configuration ---
     input_folder = f'{parent_folder}/data_processing/data'
-    output_folder = f'{parent_folder}/data_processing/output/{participant_string(participants)}'
+    output_folder = f'{parent_folder}/data_processing/heatmaps/{participant_string(participants)}'
     os.makedirs(output_folder, exist_ok=True)
 
     for temperature in temperatures:

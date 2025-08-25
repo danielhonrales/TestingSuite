@@ -21,7 +21,7 @@ parent_folder = 'Assets/Studies/CHI26_Study2_Saltation'
 def main():
     # --- Configuration ---
     input_folder = f'{parent_folder}/data_processing/data'
-    output_folder = f'{parent_folder}/data_processing/output/{participant_string(participants)}'
+    output_folder = f'{parent_folder}/data_processing/heatmaps/{participant_string(participants)}'
     os.makedirs(output_folder, exist_ok=True)
 
     for temperature in temperatures:

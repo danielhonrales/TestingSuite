@@ -5,7 +5,7 @@ public static class ThermalVoltageMapping
     public static readonly Dictionary<int, float> targetTempToVoltMapping = new()
     {
         {42,     1.3f},
-        {41,     1.5f},
+        {41,     1.1f},
         {40,     1.1f},
         {39,     1.3f},
         {38,     1.2f},
