@@ -14,7 +14,7 @@ public class TrialInfo
         duration = 0;
     }
 
-    public virtual string GetPiMessage(int baseTemp)
+    public virtual string GetPiMessage(int baseTemp, float overrideHotVoltage)
     {
         return JsonUtility.ToJson(new PiMessage(this));
     }

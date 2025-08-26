@@ -12,6 +12,9 @@ using UnityEngine.UI;
 public class SuiteController_Study3_Motion : SuiteController
 {
 
+    public TMP_InputField inputDuration;
+    public TMP_InputField inputDirection;
+
     public override TrialInfo CreateTrialInfo(string data)
     {
         return new TrialInfo_Study3_Motion(data);
@@ -43,5 +46,14 @@ public class SuiteController_Study3_Motion : SuiteController
             writer.WriteLine($"{responseParticipantNumber},{responseTrialNumber},{feltThermal},{feltMotion},{feltDirection}");
         }
         Console.WriteLine($"Wrote trial {responseTrialNumber} to CSV.");
+    }
+
+    public void SendTestMessage()
+    {
+        TrialInfo_Study3_Motion testTrialInfo = new("0,9,1,0");
+        testTrialInfo.duration = float.Parse(inputDuration.text);
+        testTrialInfo.direction = int.Parse(inputDirection.text);
+        string message = JsonUtility.ToJson(new PiMessage_Study3_Motion(baseTemp + testTrialInfo.temperature, testTrialInfo, overrideHotVoltage));
+        communicationController.SendMessageToPi(message);
     }
 }

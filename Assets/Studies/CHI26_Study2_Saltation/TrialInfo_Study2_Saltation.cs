@@ -18,9 +18,9 @@ public class TrialInfo_Study2_Saltation : TrialInfo
         this.direction = int.Parse(info[3]);
     }
 
-    public override string GetPiMessage(int baseTemp)
+    public override string GetPiMessage(int baseTemp, float overrideHotVoltage)
     {
-        return JsonUtility.ToJson(new PiMessage_Study2_Saltation(baseTemp + temperature, this));
+        return JsonUtility.ToJson(new PiMessage_Study2_Saltation(baseTemp + temperature, this, overrideHotVoltage));
     }
 }
 
@@ -31,10 +31,14 @@ public class PiMessage_Study2_Saltation
     public float duration;
     public int direction;
 
-    public PiMessage_Study2_Saltation(int targetTemp, TrialInfo_Study2_Saltation trialInfo)
+    public PiMessage_Study2_Saltation(int targetTemp, TrialInfo_Study2_Saltation trialInfo, float overrideHotVoltage = 0)
     {
         illusion = "saltation";
         thermalVoltage = Math.Round(ThermalVoltageMapping.targetTempToVoltMapping[targetTemp], 1);
+        if (overrideHotVoltage != 0 && targetTemp > 34)
+        {
+            thermalVoltage = Math.Min(overrideHotVoltage, 2);
+        }
         duration = trialInfo.duration;
         direction = trialInfo.direction;
     }

@@ -18,9 +18,9 @@ public class TrialInfo_Study3_Motion : TrialInfo
         this.direction = int.Parse(info[3]);
     }
 
-    public override string GetPiMessage(int baseTemp)
+    public override string GetPiMessage(int baseTemp, float overrideHotVoltage)
     {
-        return JsonUtility.ToJson(new PiMessage_Study3_Motion(baseTemp + temperature, this));
+        return JsonUtility.ToJson(new PiMessage_Study3_Motion(baseTemp + temperature, this, overrideHotVoltage));
     }
 }
 
@@ -31,10 +31,14 @@ public class PiMessage_Study3_Motion
     public float duration;
     public int direction;
 
-    public PiMessage_Study3_Motion(int targetTemp, TrialInfo_Study3_Motion trialInfo)
+    public PiMessage_Study3_Motion(int targetTemp, TrialInfo_Study3_Motion trialInfo, float overrideHotVoltage)
     {
         illusion = "motion";
         thermalVoltage = Math.Round(ThermalVoltageMapping.targetTempToVoltMapping[targetTemp], 1);
+        if (overrideHotVoltage != 0 && targetTemp > 34)
+        {
+            thermalVoltage = Math.Min(overrideHotVoltage, 2);
+        }
         duration = trialInfo.duration;
         direction = trialInfo.direction;
     }
