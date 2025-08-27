@@ -87,8 +87,50 @@ def flip_pngs_in_folder(input_folder, output_folder=None):
             flipped_img.save(output_path)
             print(f"Flipped: {filename}")
 
+def scale_and_translate_png(input_path, output_path, scale=1.0, translate=(0, 0), bg_size=None):
+    """
+    Scale and translate a PNG image, preserving transparency.
+
+    Args:
+        input_path (str): Path to input PNG.
+        output_path (str): Path to save transformed PNG.
+        scale (float): Scale factor (e.g. 0.5 = half size, 2.0 = double size).
+        translate (tuple): (x_shift, y_shift) in pixels. Positive = right/down.
+        bg_size (tuple): (width, height) of output canvas. If None, fits image.
+    """
+    # Open with alpha channel
+    img = Image.open(input_path).convert("RGBA")
+
+    # Scale image
+    new_size = (int(img.width * scale), int(img.height * scale))
+    img_scaled = img.resize(new_size, Image.LANCZOS)
+
+    # Create background canvas
+    if bg_size is None:
+        bg_size = (img_scaled.width + abs(translate[0]),
+                   img_scaled.height + abs(translate[1]))
+    canvas = Image.new("RGBA", bg_size, (0, 0, 0, 0))
+
+    # Paste at translated position
+    x_offset = max(0, translate[0])
+    y_offset = max(0, translate[1])
+    canvas.paste(img_scaled, (x_offset, y_offset), img_scaled)
+
+    # Save output
+    canvas.save(output_path, "PNG")
+    print(f"Saved transformed PNG: {output_path}")
+
 #rename_files_in_folder("Assets\Studies\CHI26_Study1_Funneling\drawings\p20", 20, 1)
 #shift_images_left("Assets\Studies\CHI26_Study1_Funneling\drawings\p1", shift_pixels=50)
 #shift_images_left("Assets\Studies\CHI26_Study1_Funneling\drawings\p2", shift_pixels=50)
 #flip_pngs_in_folder("Assets\Studies\CHI26_Study1_Funneling\drawings\p4")
-shift_images_left("Assets\Studies\CHI26_Study1_Funneling\drawings\p4", shift_pixels=10)
+#shift_images_left("Assets\Studies\CHI26_Study1_Funneling\drawings\p4", shift_pixels=10)
+
+#for i in range(1, 5):
+scale_and_translate_png(
+    "D:\\UnityProjects\\TestingSuite\\Assets\Studies\\CHI26_Study2_Saltation\\data_processing\\heatmaps\\p1-4\\p1-4_temp-9_dur-0.1_dir-0.png",
+    "D:\\UnityProjects\\TestingSuite\\Assets\Studies\\CHI26_Study2_Saltation\\data_processing\\heatmaps\\p1-4\\test.png",
+    scale=0.8,          # shrink to half
+    translate=(50, 30), # move 50px right, 30px down
+    bg_size=(500, 500)  # force output canvas size
+)
