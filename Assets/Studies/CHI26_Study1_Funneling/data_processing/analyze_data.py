@@ -39,9 +39,13 @@ def process_participant_data(folder_path, participants, output_folder):
             # Compute new columns
             df["ThermalMatch"] = (np.sign(df["Temperature"]) == np.sign(df["FeltThermal"])).astype(int)
 
-            df["LocationError"] = df["Location"] - df["FeltLocation"]
+            exclude_mask = ((df["Location"] == 0) & (df["FeltLocation"] > 0.5)) | \
+               ((df["Location"] == 1) & (df["FeltLocation"] < 0.5))
+            df_filtered = df[~exclude_mask].copy()
 
-            all_data.append(df)
+            df_filtered["LocationError"] = df_filtered["Location"] - df_filtered["FeltLocation"]
+
+            all_data.append(df_filtered)
         else:
             print(f"Warning: File not found for participant {p}")
 
