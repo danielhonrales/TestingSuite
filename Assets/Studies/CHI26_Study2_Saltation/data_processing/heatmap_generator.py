@@ -11,7 +11,7 @@ from scipy.ndimage import gaussian_filter
 import random
 import os
 
-participants = [5]
+participants = [1,2,3,4,5,6]
 temperatures = [9, -15]
 directions =  [1, 0]
 durations = [0.1, .25, .5]
@@ -108,7 +108,7 @@ def generate_heatmap(output_folder, trials_to_process, temperature, filename):
     plt.axis('off')
 
     # Coordinates where you want to place the circles (in image coordinates, i.e., pixels)
-    circle_coords = [(370, 150), (510, 150)]
+    circle_coords = [(370, 155), (510, 155)]
     circle_radius = 5
     circle_color = 'gray'
     ax = plt.gca()
@@ -117,7 +117,7 @@ def generate_heatmap(output_folder, trials_to_process, temperature, filename):
         ax.add_patch(circ)
 
     # Rectangle center coordinates
-    rect_center = (585, 150)
+    rect_center = (594, 155)
     rect_width = 10
     rect_height = 10
     x0 = rect_center[0] - rect_width / 2

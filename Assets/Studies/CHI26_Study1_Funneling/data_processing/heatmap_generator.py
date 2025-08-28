@@ -103,7 +103,7 @@ def generate_heatmap(output_folder, trials_to_process, temperature, filename, lo
     plt.axis('off')
 
     # Coordinates where you want to place the circles (in image coordinates, i.e., pixels)
-    circle_coords = [(304, 150), (505, 150)]
+    circle_coords = [(370, 155), (510, 155)]
     circle_radius = 8
     circle_color = 'gray'
     ax = plt.gca()
@@ -112,7 +112,7 @@ def generate_heatmap(output_folder, trials_to_process, temperature, filename, lo
         ax.add_patch(circ)
 
     # Rectangle center coordinates
-    rect_center = (585, 150)
+    rect_center = (594, 155)
     rect_width = 15
     rect_height = 15
     x0 = rect_center[0] - rect_width / 2
@@ -121,7 +121,7 @@ def generate_heatmap(output_folder, trials_to_process, temperature, filename, lo
                     linewidth=1.5, edgecolor='gray', facecolor='gray', alpha=0.8)
     ax.add_patch(rect)
 
-    circle_coords = (304 + ((505 - 304) * location), 150)
+    circle_coords = (370 + ((510 - 370) * location), 155)
     circle_radius = 5
     circle_color = 'red' if temperature > 0 else 'blue'
     circle_edgecolor = 'black'
