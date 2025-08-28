@@ -1,6 +1,7 @@
 import os
 import re
 from PIL import Image
+import cv2
 
 def rename_files_in_folder(folder_path, old_num, new_num):
     """
@@ -65,7 +66,7 @@ def delete_shifted_files(folder_path, keyword="shifted"):
                 os.remove(file_path)
                 print(f"Deleted: {file_path}")
                 
-def flip_pngs_in_folder(input_folder, output_folder=None):
+def horizontal_flip_pngs_in_folder(input_folder, output_folder=None):
     # If no output folder specified, overwrite in place
     if output_folder is None:
         output_folder = input_folder
@@ -82,6 +83,28 @@ def flip_pngs_in_folder(input_folder, output_folder=None):
 
             # Flip along vertical axis (left-right flip)
             flipped_img = img.transpose(Image.FLIP_LEFT_RIGHT)
+
+            # Save flipped image
+            flipped_img.save(output_path)
+            print(f"Flipped: {filename}")
+            
+def vertical_flip_pngs_in_folder(input_folder, output_folder=None):
+    # If no output folder specified, overwrite in place
+    if output_folder is None:
+        output_folder = input_folder
+    else:
+        os.makedirs(output_folder, exist_ok=True)
+
+    for filename in os.listdir(input_folder):
+        if filename.lower().endswith(".png"):
+            input_path = os.path.join(input_folder, filename)
+            output_path = os.path.join(output_folder, filename)
+
+            # Open image
+            img = Image.open(input_path)
+
+            # Flip along vertical axis (left-right flip)
+            flipped_img = img.transpose(Image.FLIP_TOP_BOTTOM)
 
             # Save flipped image
             flipped_img.save(output_path)
@@ -120,6 +143,7 @@ def scale_and_translate_png(input_path, output_path, scale=1.0, translate=(0, 0)
     canvas.save(output_path, "PNG")
     print(f"Saved transformed PNG: {output_path}")
 
+
 #rename_files_in_folder("Assets\Studies\CHI26_Study1_Funneling\drawings\p20", 20, 1)
 #shift_images_left("Assets\Studies\CHI26_Study1_Funneling\drawings\p1", shift_pixels=50)
 #shift_images_left("Assets\Studies\CHI26_Study1_Funneling\drawings\p2", shift_pixels=50)
@@ -127,10 +151,5 @@ def scale_and_translate_png(input_path, output_path, scale=1.0, translate=(0, 0)
 #shift_images_left("Assets\Studies\CHI26_Study1_Funneling\drawings\p4", shift_pixels=10)
 
 #for i in range(1, 5):
-scale_and_translate_png(
-    "D:\\UnityProjects\\TestingSuite\\Assets\Studies\\CHI26_Study2_Saltation\\data_processing\\heatmaps\\p1-4\\p1-4_temp-9_dur-0.1_dir-0.png",
-    "D:\\UnityProjects\\TestingSuite\\Assets\Studies\\CHI26_Study2_Saltation\\data_processing\\heatmaps\\p1-4\\test.png",
-    scale=0.8,          # shrink to half
-    translate=(50, 30), # move 50px right, 30px down
-    bg_size=(500, 500)  # force output canvas size
-)
+
+vertical_flip_pngs_in_folder("C:/Users/Daniel/Documents/TestingSuite/Assets/Studies/CHI26_Study2_Saltation/drawings/p5")
