@@ -194,7 +194,7 @@ def expand_canvas(input_folder, output_folder=None, new_size=None, fill=(255, 25
 #flip_pngs_in_folder("Assets\Studies\CHI26_Study1_Funneling\drawings\p4")
 #shift_images_left("Assets\Studies\CHI26_Study1_Funneling\drawings\p4", shift_pixels=10)
 
-for i in range(6, 7):
-    path = f"D:\\UnityProjects\\TestingSuite\\Assets\\Studies\\CHI26_Study2_Saltation\\drawings\\p{i}"
+for i in range(1, 12):
+    path = f"D:\\UnityProjects\\TestingSuite\\Assets\\Studies\\CHI26_Study3_Motion\\drawings\\p{i}"
     #scale_and_translate_pngs_in_folder(path, scale=.8, translate=(45,0))
-    vertical_flip_pngs_in_folder(path)
+    horizontal_flip_pngs_in_folder(path)
