@@ -4,7 +4,7 @@ import os
 import numpy as np
 
 def main():
-    participants = [12]
+    participants = [3]
     parent_folder = 'Assets/Studies/CHI26_Study2_Saltation'
     input_folder = f'{parent_folder}/data_processing/data'
     output_folder = f'{parent_folder}/data_processing/analysis/{participant_string(participants)}'
