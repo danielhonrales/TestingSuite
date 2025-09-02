@@ -4,7 +4,7 @@ import os
 import numpy as np
 
 def main():
-    participants = [5]
+    participants = [1,2,3,4,5,6,7,8,9,10,11,12,13,14]
     parent_folder = 'Assets/Studies/CHI26_Study1_Funneling'
     input_folder = f'{parent_folder}/data_processing/data'
     output_folder = f'{parent_folder}/data_processing/analysis/{participant_string(participants)}'
@@ -166,12 +166,13 @@ def generate_graph(df, excel_file, output_folder):
         print(f"Saved plot: {outpath}")
 
    # === Combined subplot figure ===
-    nrows = 2
-    ncols = int(np.ceil(len(durations) / nrows))
-    fig, axes = plt.subplots(nrows, ncols, figsize=(5*ncols, 5*nrows), squeeze=False)
+    nrows = 1
+    ncols = len(durations)
+    fig, axes = plt.subplots(nrows, ncols, figsize=(5*ncols, 5), squeeze=False)
+    axes = axes.flatten()  # make it 1D array for easy indexing
 
     for idx, dur in enumerate(durations):
-        ax = axes[idx // ncols, idx % ncols]
+        ax = axes[idx]
 
         if dur == "all":
             data = grouped_all.copy()
@@ -185,24 +186,19 @@ def generate_graph(df, excel_file, output_folder):
 
         # ✅ Plot each temperature separately
         for temp, style in temp_styles.items():
-            temp_data = data[data["Temperature"] == temp]   # <--- filter by temp
+            temp_data = data[data["Temperature"] == temp]
             if temp_data.empty:
                 continue
 
-            # Apply small x-offset to avoid overlap
             x_vals = temp_data["Location"] + temp_offsets[temp]
 
-            ax.errorbar(x_vals, temp_data["FeltLocation_mean"],
-                        yerr=temp_data["FeltLocation_sem"],
-                        fmt=style["marker"], color=style["color"],
-                        capsize=4, markersize=8, label=style["label"])
-
-            # Add labels at shifted x too
-            """ for _, row in temp_data.iterrows():
-                ax.text(row["Location"] + temp_offsets[temp],
-                        row["FeltLocation_mean"],
-                        f"{row['FeltLocation_mean']:.2f}",
-                        fontsize=8, ha="center", va="bottom") """
+            ax.errorbar(
+                x_vals,
+                temp_data["FeltLocation_mean"],
+                yerr=temp_data["FeltLocation_sem"],
+                fmt=style["marker"], color=style["color"],
+                capsize=4, markersize=8, label=style["label"]
+            )
 
         ax.set_title(title)
         ax.set_xlabel("Intended Location")
@@ -215,9 +211,6 @@ def generate_graph(df, excel_file, output_folder):
 
         if idx == 0:  # only put legend once
             ax.legend()
-        # Hide unused axes
-        for j in range(len(durations), nrows*ncols):
-            fig.delaxes(axes[j // ncols, j % ncols])
 
         combined_path = os.path.join(output_folder, "scatter_combined.png")
         plt.tight_layout()
