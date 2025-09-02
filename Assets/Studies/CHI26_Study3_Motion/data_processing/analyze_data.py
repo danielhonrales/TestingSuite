@@ -27,6 +27,7 @@ def process_participant_data(folder_path, participants, output_folder):
         pd.DataFrame: Combined processed DataFrame.
     """
     all_data = []
+    filtered_data = []
 
     for p in participants:
         filename = os.path.join(folder_path, f"p{p}_data.xlsx")
@@ -38,10 +39,13 @@ def process_participant_data(folder_path, participants, output_folder):
 
             # Compute new columns
             df["ThermalMatch"] = (np.sign(df["Temperature"]) == np.sign(df["FeltThermal"])).astype(int)
-
             df["DirectionMatch"] = (df["Direction"] == df["FeltDirection"]).astype(int)
 
+            include_mask = (df["ThermalMatch"] == 1) & (df["DirectionMatch"] == 1)
+            df_filtered = df[include_mask].copy()
+
             all_data.append(df)
+            filtered_data.append(df_filtered)
         else:
             print(f"Warning: File not found for participant {p}")
 
@@ -49,19 +53,24 @@ def process_participant_data(folder_path, participants, output_folder):
         print("No data loaded.")
         return pd.DataFrame()
 
-    # Combine
-    combined = pd.concat(all_data, ignore_index=True)
-
-    # Ensure output folder exists
+    all_combined = pd.concat(all_data, ignore_index=True)
+    filtered_combined = pd.concat(filtered_data, ignore_index=True)
     os.makedirs(output_folder, exist_ok=True)
+
+    print(f'Thermal Match: {all_combined["ThermalMatch"].sum()} / {all_combined["ThermalMatch"].count()}, {all_combined["ThermalMatch"].sum() / all_combined["ThermalMatch"].count()}')
+    print(f'Direction Match: {all_combined["DirectionMatch"].sum()} / {all_combined["DirectionMatch"].count()}, {all_combined["DirectionMatch"].sum() / all_combined["DirectionMatch"].count()}')
+    print(f'Valid Trials: {filtered_combined["Participant"].count()} / {all_combined["Participant"].count()}, {filtered_combined["Participant"].count() / all_combined["Participant"].count()}')
 
     # Save file named after first and last participant
     filename_out = f"{participant_string(participants)}_analysis.xlsx"
     output_path = os.path.join(output_folder, filename_out)
-    combined.to_excel(output_path, index=False)
+    filtered_combined.to_excel(output_path, index=False)
+    filename_out_csv = f"{participant_string(participants)}_analysis.csv"
+    output_path_csv = os.path.join(output_folder, filename_out_csv)
+    filtered_combined.to_csv(output_path_csv, index=False)
 
     print(f"Saved combined data to {output_path}")
-    return combined, output_path
+    return filtered_combined, output_path
 
 def generate_graph(df, excel_file, output_folder):
     """

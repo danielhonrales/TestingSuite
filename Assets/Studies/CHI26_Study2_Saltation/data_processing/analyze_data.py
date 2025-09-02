@@ -13,6 +13,7 @@ def main():
     generate_graph(combined_data, excel_file, output_folder)
 
 def process_participant_data(folder_path, participants, output_folder):
+    filtered_data = []
     all_data = []
 
     for p in participants:
@@ -23,8 +24,21 @@ def process_participant_data(folder_path, participants, output_folder):
             df["Participant"] = p
             df["ThermalMatch"] = (np.sign(df["Temperature"]) == np.sign(df["FeltThermal"])).astype(int)
             df["NumMatch"] = (df["numLocation"] == 3).astype(int)
+            df["DirectionMatch"] = np.where(
+                (df["Direction"] == 0) & (df["location1"] >= df["location2"]) & (df["location2"] >= df["location3"]),
+                1,
+                np.where(
+                    (df["Direction"] == 1) & (df["location1"] <= df["location2"]) & (df["location2"] <= df["location3"]),
+                    1,
+                    0
+                )
+            )
+            
+            include_mask = (df["ThermalMatch"] == 1) & (df["NumMatch"] == 1) & df["DirectionMatch"] == 1
+            df_filtered = df[include_mask].copy()
 
             all_data.append(df)
+            filtered_data.append(df_filtered)
         else:
             print(f"Warning: File not found for participant {p}")
 
@@ -32,15 +46,24 @@ def process_participant_data(folder_path, participants, output_folder):
         print("No data loaded.")
         return pd.DataFrame()
 
-    combined = pd.concat(all_data, ignore_index=True)
+    all_combined = pd.concat(all_data, ignore_index=True)
+    filtered_combined = pd.concat(filtered_data, ignore_index=True)
     os.makedirs(output_folder, exist_ok=True)
+
+    print(f'Thermal Match: {all_combined["ThermalMatch"].sum()} / {all_combined["ThermalMatch"].count()}, {all_combined["ThermalMatch"].sum() / all_combined["ThermalMatch"].count()}')
+    print(f'Num Match: {all_combined["NumMatch"].sum()} / {all_combined["NumMatch"].count()}, {all_combined["NumMatch"].sum() / all_combined["NumMatch"].count()}')
+    print(f'Direction Match: {all_combined["DirectionMatch"].sum()} / {all_combined["DirectionMatch"].count()}, {all_combined["DirectionMatch"].sum() / all_combined["DirectionMatch"].count()}')
+    print(f'Valid Trials: {filtered_combined["Participant"].count()} / {all_combined["Participant"].count()}, {filtered_combined["Participant"].count() / all_combined["Participant"].count()}')
 
     filename_out = f"{participant_string(participants)}_analysis.xlsx"
     output_path = os.path.join(output_folder, filename_out)
-    combined.to_excel(output_path, index=False)
+    filtered_combined.to_excel(output_path, index=False)
+    filename_out_csv = f"{participant_string(participants)}_analysis.csv"
+    output_path_csv = os.path.join(output_folder, filename_out_csv)
+    filtered_combined.to_csv(output_path_csv, index=False)
 
     print(f"Saved combined data to {output_path}")
-    return combined, output_path
+    return filtered_combined, output_path
 
 
 import os

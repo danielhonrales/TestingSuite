@@ -11,7 +11,7 @@ from scipy.ndimage import gaussian_filter
 import random
 import os
 
-participants = [1,2,3,4,5,6,7,8,9,10,11,12,13,14]
+participants = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
 temperatures = [9, -15]
 durations = [0.1, 1, 2]
 locations = [0, .25, .5, .75, 1]
@@ -57,6 +57,7 @@ def process_data(input_folder, output_folder, participants, filename, temperatur
                         (np.sign(df["Temperature"]) == np.sign(df["FeltThermal"])) &
                         (df["Location"] == location) &
                         (df["Duration"] == duration)
+                        #(abs(df["Location"] - df["FeltLocation"]) <= .45)
                     )
 
                     valid_trials[file_participant] = df[condition]['Trial'].tolist()
@@ -71,72 +72,92 @@ def generate_heatmap(output_folder, trials_to_process, temperature, filename, lo
     mask_filepath = f"Assets/arm_mask.png"
     mask_img = Image.open(mask_filepath).convert("L")
     mask_array = np.array(mask_img)
-    # Convert to binary mask
     binary_mask = (mask_array > 128).astype(int)  # 1s where heatmap is allowed
 
     # Get heat map data
     heat_map = np.zeros(mask_array.shape)
-
     for par in trials_to_process:
         par_folder = os.path.join(f"{parent_folder}/drawings/", f"p{par}")
         for trial in trials_to_process[par]:
             filepath = os.path.join(par_folder, f"p{par}_trial{trial}_drawing.png")
             heat_map = process_drawing(filepath, heat_map)
 
-    # Shift
-    """ n_pixels = 50
-    heat_map = np.roll(heat_map, shift=-n_pixels, axis=1)
-    heat_map[:, -n_pixels:] = 0 """
-    
     sigma = 1
     heat_map = gaussian_filter(heat_map, sigma=sigma)
-    masked_data = heat_map * binary_mask           # Apply mask
-
-    # Transparent background
+    masked_data = heat_map * binary_mask
     masked_alpha = np.where(binary_mask, 1.0, 0.0)
 
-    # Heat map
+    # === Plot ===
     plt.figure(figsize=(10, 10))
     cmap = plt.cm.hot if temperature > 0 else plt.cm.bone
-    #cmap = cmap.reversed()
     plt.imshow(masked_data, cmap=cmap, interpolation='antialiased', alpha=masked_alpha)
     plt.axis('off')
 
-    # Coordinates where you want to place the circles (in image coordinates, i.e., pixels)
-    circle_coords = [(330, 155), (190, 155)]
-    circle_radius = 8
-    circle_color = 'gray'
     ax = plt.gca()
+    circle_coords = [(330, 155), (190, 155)]
     for (x, y) in circle_coords:
-        circ = Circle((x, y), radius=circle_radius, color=circle_color, alpha=0.8)
+        circ = Circle((x, y), radius=8, color='gray', alpha=0.8)
         ax.add_patch(circ)
 
-    # Rectangle center coordinates
     rect_center = (106, 155)
-    rect_width = 15
-    rect_height = 15
-    x0 = rect_center[0] - rect_width / 2
-    y0 = rect_center[1] - rect_height / 2
-    rect = Rectangle((x0, y0), rect_width, rect_height,
-                    linewidth=1.5, edgecolor='gray', facecolor='gray', alpha=0.8)
+    rect = Rectangle(
+        (rect_center[0] - 7.5, rect_center[1] - 7.5),
+        15, 15,
+        linewidth=1.5, edgecolor='gray', facecolor='gray', alpha=0.8
+    )
     ax.add_patch(rect)
 
     circle_coords = (330 + ((190 - 330) * location), 155)
-    circle_radius = 5
-    circle_color = 'red' if temperature > 0 else 'blue'
-    circle_edgecolor = 'black'
-    ax = plt.gca()
-    circ = Circle(circle_coords, radius=circle_radius, facecolor=circle_color, alpha=0.8, edgecolor=circle_edgecolor, linewidth=1)
+    circ = Circle(circle_coords, radius=5,
+                  facecolor='red' if temperature > 0 else 'blue',
+                  edgecolor='black', alpha=0.8, linewidth=1)
     ax.add_patch(circ)
 
+    # === Save temp file first ===
     file_path = os.path.join(output_folder, filename)
-    plt.savefig(file_path, dpi=300, bbox_inches='tight')
+    temp_path = file_path.replace(".png", "_raw.png")
+    plt.savefig(temp_path, dpi=300, bbox_inches='tight')
+    plt.close()
+
+    # === Crop with Pillow ===
+    crop_box = (300, 275, 1300, 775)  # (left, upper, right, lower)
+    img = Image.open(temp_path)
+    cropped_img = img.crop(crop_box)
+
+    transparent_img = make_border_white_transparent(cropped_img)
+    transparent_img.save(file_path)
+
+    # Remove temp file (optional)
+    os.remove(temp_path)
+
     print(f"Saved to {file_path} with {sum(len(par) for par in trials_to_process.values())} files processed")
     for par in trials_to_process:
         print(f"\t{par}: {trials_to_process[par]}")
 
-    plt.close()
-    
+def make_border_white_transparent(img, margin=150, white_thresh=250):
+    """
+    Turns white pixels transparent only within `margin` pixels from the border.
+    """
+    img = img.convert("RGBA")
+    width, height = img.size
+    datas = img.getdata()
+
+    new_data = []
+    for i, item in enumerate(datas):
+        x = i % width
+        y = i // width
+
+        # Check if pixel is near the border
+        near_border = (x < margin or x >= width - margin or 
+                       y < margin or y >= height - margin)
+
+        if near_border and item[0] > white_thresh and item[1] > white_thresh and item[2] > white_thresh:
+            new_data.append((255, 255, 255, 0))  # transparent
+        else:
+            new_data.append(item)
+
+    img.putdata(new_data)
+    return img
 
 def process_drawing(filepath, heat_map):
     if os.path.isfile(filepath):

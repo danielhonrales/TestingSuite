@@ -4,7 +4,7 @@ import os
 import numpy as np
 
 def main():
-    participants = [1,2,3,4,5,6,7,8,9,10,11,12,13,14]
+    participants = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
     parent_folder = 'Assets/Studies/CHI26_Study1_Funneling'
     input_folder = f'{parent_folder}/data_processing/data'
     output_folder = f'{parent_folder}/data_processing/analysis/{participant_string(participants)}'
@@ -26,6 +26,7 @@ def process_participant_data(folder_path, participants, output_folder):
     Returns:
         pd.DataFrame: Combined processed DataFrame.
     """
+    filtered_data = []
     all_data = []
 
     for p in participants:
@@ -33,19 +34,15 @@ def process_participant_data(folder_path, participants, output_folder):
         if os.path.exists(filename):
             df = pd.read_excel(filename)
 
-            # Add participant number
             df["Participant"] = p
-
-            # Compute new columns
             df["ThermalMatch"] = (np.sign(df["Temperature"]) == np.sign(df["FeltThermal"])).astype(int)
+            df["LocationError"] = df["Location"] - df["FeltLocation"]
 
-            exclude_mask = ((df["Location"] == 0) & (df["FeltLocation"] > 0.5)) | \
-               ((df["Location"] == 1) & (df["FeltLocation"] < 0.5))
-            df_filtered = df[~exclude_mask].copy()
+            include_mask = df["ThermalMatch"] == 1 & (df["LocationError"] <= 0.45)
+            df_filtered = df[include_mask].copy()
 
-            df_filtered["LocationError"] = df_filtered["Location"] - df_filtered["FeltLocation"]
-
-            all_data.append(df_filtered)
+            all_data.append(df)
+            filtered_data.append(df_filtered)
         else:
             print(f"Warning: File not found for participant {p}")
 
@@ -53,19 +50,24 @@ def process_participant_data(folder_path, participants, output_folder):
         print("No data loaded.")
         return pd.DataFrame()
 
-    # Combine
-    combined = pd.concat(all_data, ignore_index=True)
-
-    # Ensure output folder exists
+    all_combined = pd.concat(all_data, ignore_index=True)
+    filtered_combined = pd.concat(filtered_data, ignore_index=True)
     os.makedirs(output_folder, exist_ok=True)
+
+    print(f'Thermal Match: {all_combined["ThermalMatch"].sum()} / {all_combined["ThermalMatch"].count()}, {all_combined["ThermalMatch"].sum() / all_combined["ThermalMatch"].count()}')
+    print(f'Egregious Location: {(all_combined["LocationError"] > 0.45).sum()} / {all_combined["LocationError"].count()}, {(all_combined["LocationError"] > 0.45).sum() / all_combined["LocationError"].count()}')
+    print(f'Valid Trials: {filtered_combined["Participant"].count()} / {all_combined["Participant"].count()}, {filtered_combined["Participant"].count() / all_combined["Participant"].count()}')
 
     # Save file named after first and last participant
     filename_out = f"{participant_string(participants)}_analysis.xlsx"
     output_path = os.path.join(output_folder, filename_out)
-    combined.to_excel(output_path, index=False)
+    filtered_combined.to_excel(output_path, index=False)
+    filename_out_csv = f"{participant_string(participants)}_analysis.csv"
+    output_path_csv = os.path.join(output_folder, filename_out_csv)
+    filtered_combined.to_csv(output_path_csv, index=False)
 
     print(f"Saved combined data to {output_path}")
-    return combined, output_path
+    return filtered_combined, output_path
 
 def generate_graph(df, excel_file, output_folder):
     """
@@ -76,6 +78,9 @@ def generate_graph(df, excel_file, output_folder):
     """
     # ✅ Keep only trials where ThermalMatch == 1
     df = df[df["ThermalMatch"] == 1]
+
+    df["Location"] *= 10
+    df["FeltLocation"] *= 10
 
     # Compute mean + SEM (safe SEM to avoid NaN)
     grouped = (
@@ -110,7 +115,7 @@ def generate_graph(df, excel_file, output_folder):
 
     # Durations to plot (unique + "all")
     durations = sorted(df["Duration"].unique())
-    durations.append("all")
+    #durations.append("all")
 
     tables_to_save = {}
     figs = []  # store individual figure paths
@@ -151,10 +156,10 @@ def generate_graph(df, excel_file, output_folder):
         plt.title(title)
         plt.xlabel("Intended Location")
         plt.ylabel("Perceived Location (avg)")
-        plt.xticks([0, 0.25, 0.5, 0.75, 1.0])
-        plt.yticks([0, 0.25, 0.5, 0.75, 1.0])
-        plt.xlim(-0.05, 1.05)
-        plt.ylim(-0.05, 1.05)
+        plt.xticks([0.0, 2.5, 5.0, 7.5, 10.0])
+        plt.yticks([0.0, 2.5, 5.0, 7.5, 10.0])
+        plt.xlim(-0.5, 10.5)
+        plt.ylim(-0.5, 10.5)
         plt.legend()
         plt.grid(True, linestyle="--", alpha=0.5)
 
@@ -165,7 +170,7 @@ def generate_graph(df, excel_file, output_folder):
         figs.append((title, outpath))
         print(f"Saved plot: {outpath}")
 
-   # === Combined subplot figure ===
+    # === Combined subplot figure ===
     nrows = 1
     ncols = len(durations)
     fig, axes = plt.subplots(nrows, ncols, figsize=(5*ncols, 5), squeeze=False)
@@ -201,28 +206,25 @@ def generate_graph(df, excel_file, output_folder):
             )
 
         ax.set_title(title)
-        ax.set_xlabel("Intended Location")
-        ax.set_ylabel("Perceived Location (avg)")
-        ax.set_xticks([0, 0.25, 0.5, 0.75, 1.0])
-        ax.set_yticks([0, 0.25, 0.5, 0.75, 1.0])
-        ax.set_xlim(-0.05, 1.05)
-        ax.set_ylim(-0.05, 1.05)
+        ax.set_xlabel("Intended Location (cm)")
+        ax.set_ylabel("Perceived Location (cm)")   # ✅ keep individual y-labels
+        ax.set_xticks([0.0, 2.5, 5.0, 7.5, 10.0])
+        ax.set_yticks([0.0, 2.5, 5.0, 7.5, 10.0])
+        ax.set_xlim(-0.5, 10.5)
+        ax.set_ylim(-0.5, 10.5)
         ax.grid(True, linestyle="--", alpha=0.5)
 
         if idx == 0:  # only put legend once
             ax.legend()
 
-        combined_path = os.path.join(output_folder, "scatter_combined.png")
-        plt.tight_layout()
-        fig.savefig(combined_path, dpi=300, bbox_inches="tight")
-        plt.close()
-        print(f"Saved combined plot: {combined_path}")
+    # Increase horizontal space so y-labels don’t overlap
+    plt.subplots_adjust(wspace=0.4)
 
-        # === Save data tables ===
-        with pd.ExcelWriter(excel_file, mode="a", engine="openpyxl", if_sheet_exists="replace") as writer:
-            for sheet, table in tables_to_save.items():
-                table.to_excel(writer, sheet_name=sheet, index=False)
-        print(f"Saved graph data tables into {excel_file}")
+    combined_path = os.path.join(output_folder, "scatter_combined.png")
+    plt.tight_layout()
+    fig.savefig(combined_path, dpi=300, bbox_inches="tight")
+    plt.close()
+    print(f"Saved combined plot: {combined_path}")
 
 def participant_string(participants):
     """
