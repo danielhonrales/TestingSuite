@@ -11,7 +11,7 @@ from scipy.ndimage import gaussian_filter
 import random
 import os
 
-participants = [14]
+participants = [15]
 temperatures = [9, -15]
 directions =  [1, 0]
 durations = [0.1, 1, 2]
