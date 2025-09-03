@@ -33,6 +33,21 @@ def process_participant_data(folder_path, participants, output_folder):
                     0
                 )
             )
+            df["Displacement1"] = np.where(
+                (df["Direction"] == 0),
+                abs(1 - df["location1"]),
+                abs(0 - df["location1"])
+            )
+            df["Displacement2"] = np.where(
+                (df["Direction"] == 0),
+                abs(1 - df["location2"]),
+                abs(0 - df["location2"])
+            )
+            df["Displacement3"] = np.where(
+                (df["Direction"] == 1),
+                abs(1 - df["location3"]),
+                abs(0 - df["location3"])
+            )
             
             include_mask = (df["ThermalMatch"] == 1) & (df["NumMatch"] == 1) & df["DirectionMatch"] == 1
             df_filtered = df[include_mask].copy()
@@ -55,12 +70,26 @@ def process_participant_data(folder_path, participants, output_folder):
     print(f'Direction Match: {all_combined["DirectionMatch"].sum()} / {all_combined["DirectionMatch"].count()}, {all_combined["DirectionMatch"].sum() / all_combined["DirectionMatch"].count()}')
     print(f'Valid Trials: {filtered_combined["Participant"].count()} / {all_combined["Participant"].count()}, {filtered_combined["Participant"].count() / all_combined["Participant"].count()}')
 
+    # Melt the location columns into long format
+    reformatted_df = pd.wide_to_long(
+        filtered_combined,
+        stubnames=["location", "Displacement"],
+        i=[
+            "Participant", "Trial", "Temperature", "Duration", "Direction",
+            "FeltThermal", "numLocation", "extraLocations",
+            "ThermalMatch", "NumMatch", "DirectionMatch"
+        ],
+        j="Location",
+        sep="",
+        suffix="\\d+"
+    ).reset_index().rename(columns={"location": "FeltLocation"})
+
     filename_out = f"{participant_string(participants)}_analysis.xlsx"
     output_path = os.path.join(output_folder, filename_out)
-    filtered_combined.to_excel(output_path, index=False)
+    reformatted_df.to_excel(output_path, index=False)
     filename_out_csv = f"{participant_string(participants)}_analysis.csv"
     output_path_csv = os.path.join(output_folder, filename_out_csv)
-    filtered_combined.to_csv(output_path_csv, index=False)
+    reformatted_df.to_csv(output_path_csv, index=False)
 
     print(f"Saved combined data to {output_path}")
     return filtered_combined, output_path
