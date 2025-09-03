@@ -55,12 +55,27 @@ def process_participant_data(folder_path, participants, output_folder):
     print(f'Direction Match: {all_combined["DirectionMatch"].sum()} / {all_combined["DirectionMatch"].count()}, {all_combined["DirectionMatch"].sum() / all_combined["DirectionMatch"].count()}')
     print(f'Valid Trials: {filtered_combined["Participant"].count()} / {all_combined["Participant"].count()}, {filtered_combined["Participant"].count() / all_combined["Participant"].count()}')
 
+    # Melt the location columns into long format
+    reformatted_df = filtered_combined.melt(
+        id_vars=[
+            "Participant", "Trial", "Temperature", "Duration", "Direction",
+            "FeltThermal", "numLocation", "extraLocations",
+            "ThermalMatch", "NumMatch", "DirectionMatch"
+        ],
+        value_vars=["location1", "location2", "location3"],
+        var_name="location",      # new column name for original column
+        value_name="feltLocation" # new column name for values
+    )
+
+    # Optional: convert location1/location2/location3 → 1/2/3
+    reformatted_df["location"] = reformatted_df["location"].str.replace("location", "").astype(int)
+
     filename_out = f"{participant_string(participants)}_analysis.xlsx"
     output_path = os.path.join(output_folder, filename_out)
-    filtered_combined.to_excel(output_path, index=False)
+    reformatted_df.to_excel(output_path, index=False)
     filename_out_csv = f"{participant_string(participants)}_analysis.csv"
     output_path_csv = os.path.join(output_folder, filename_out_csv)
-    filtered_combined.to_csv(output_path_csv, index=False)
+    reformatted_df.to_csv(output_path_csv, index=False)
 
     print(f"Saved combined data to {output_path}")
     return filtered_combined, output_path
