@@ -33,6 +33,21 @@ def process_participant_data(folder_path, participants, output_folder):
                     0
                 )
             )
+            df["Displacement1"] = np.where(
+                (df["Direction"] == 0),
+                abs(1 - df["location1"]),
+                abs(0 - df["location1"])
+            )
+            df["Displacement2"] = np.where(
+                (df["Direction"] == 0),
+                abs(1 - df["location2"]),
+                abs(0 - df["location2"])
+            )
+            df["Displacement3"] = np.where(
+                (df["Direction"] == 1),
+                abs(1 - df["location3"]),
+                abs(0 - df["location3"])
+            )
             
             include_mask = (df["ThermalMatch"] == 1) & (df["NumMatch"] == 1) & df["DirectionMatch"] == 1
             df_filtered = df[include_mask].copy()
@@ -56,19 +71,18 @@ def process_participant_data(folder_path, participants, output_folder):
     print(f'Valid Trials: {filtered_combined["Participant"].count()} / {all_combined["Participant"].count()}, {filtered_combined["Participant"].count() / all_combined["Participant"].count()}')
 
     # Melt the location columns into long format
-    reformatted_df = filtered_combined.melt(
-        id_vars=[
+    reformatted_df = pd.wide_to_long(
+        filtered_combined,
+        stubnames=["location", "Displacement"],
+        i=[
             "Participant", "Trial", "Temperature", "Duration", "Direction",
             "FeltThermal", "numLocation", "extraLocations",
             "ThermalMatch", "NumMatch", "DirectionMatch"
         ],
-        value_vars=["location1", "location2", "location3"],
-        var_name="location",      # new column name for original column
-        value_name="feltLocation" # new column name for values
-    )
-
-    # Optional: convert location1/location2/location3 → 1/2/3
-    reformatted_df["location"] = reformatted_df["location"].str.replace("location", "").astype(int)
+        j="Location",
+        sep="",
+        suffix="\\d+"
+    ).reset_index().rename(columns={"location": "FeltLocation"})
 
     filename_out = f"{participant_string(participants)}_analysis.xlsx"
     output_path = os.path.join(output_folder, filename_out)
