@@ -79,22 +79,23 @@ def generate_graph(df, excel_file, output_folder):
     Only includes rows where ThermalMatch == 1 and DirectionMatch == 1.
     """
     # ✅ Keep only trials where both matches == 1
+    # Filter data
     df = df[(df["ThermalMatch"] == 1) & (df["DirectionMatch"] == 1)]
 
     # Compute mean + SEM of FeltMotion
     grouped = (
         df.groupby(["Direction", "Temperature", "Duration"])
-          .agg(FeltMotion_mean=("FeltMotion", "mean"),
-               FeltMotion_sem=("FeltMotion",
-                               lambda x: 0 if len(x) <= 1 else x.std(ddof=1) / np.sqrt(len(x))))
-          .reset_index()
+        .agg(FeltMotion_mean=("FeltMotion", "mean"),
+            FeltMotion_sem=("FeltMotion",
+                            lambda x: 0 if len(x) <= 1 else x.std(ddof=1) / np.sqrt(len(x))))
+        .reset_index()
     )
 
     # Colors for temperatures
     temp_colors = {
-        -15: "blue",
-        0: "gray",
-        9: "red"
+        -15: {"color": "blue", "label": "Cold"},
+        0: {"color": "gray", "label": "Neutral"},
+        9: {"color": "red", "label": "Hot"}
     }
 
     # Unique values
@@ -104,23 +105,23 @@ def generate_graph(df, excel_file, output_folder):
 
     os.makedirs(output_folder, exist_ok=True)
 
-    for direction in directions:
+    # === Create one figure with subplots ===
+    fig, axes = plt.subplots(1, len(directions), figsize=(8*len(directions), 6), sharey=True)
+
+    if len(directions) == 1:
+        axes = [axes]  # make iterable if only one direction
+
+    x = np.arange(len(durations))  # X positions: durations
+    width = 0.7 / len(temperatures)   # bar width
+    spacing = 0.1
+
+    for ax, direction in zip(axes, directions):
         data_dir = grouped[grouped["Direction"] == direction]
-
-        fig, ax = plt.subplots(figsize=(8, 6))
-
-        # X positions: temperatures
-        x = np.arange(len(temperatures))
-
-        # Width of each bar cluster (smaller for spacing)
-        width = 0.7 / len(durations)   # shrink from 0.8 to 0.7 for some gap
-        spacing = 0.1
 
         for i, temp in enumerate(temperatures):
             data_temp = data_dir[data_dir["Temperature"] == temp]
 
-            means = []
-            sems = []
+            means, sems = [], []
             for dur in durations:
                 row = data_temp[data_temp["Duration"] == dur]
                 if not row.empty:
@@ -130,29 +131,32 @@ def generate_graph(df, excel_file, output_folder):
                     means.append(np.nan)
                     sems.append(0)
 
-            # Center bars around each temperature, add small separation
+            # Center bars around each duration
             positions = (
                 x + (i - (len(temperatures)-1)/2) * (width + spacing/len(temperatures))
             )
 
             ax.bar(positions, means, width, yerr=sems,
-                   color=[temp_colors[temp]],
-                   capsize=4, label=f"Temp {temp}")
+                color=temp_colors[temp]["color"],
+                capsize=4, label=f"{temp_colors[temp]['label']}")
 
         ax.set_xticks(x)
-        ax.set_xticklabels([str(dur) for dur in durations])
+        ax.set_xticklabels([str(d) + " s" for d in durations])
         ax.set_xlabel("Duration")
-        ax.set_ylabel("P(Felt Motion)")
-        ax.set_ylim(0, 1.05)
-        ax.set_title(f"Direction = {direction}")
-        ax.legend(title="Temperature")
+        ax.set_title(f"{'Elbow-To-Wrist' if direction == 0 else 'Wrist-To-Elbow'}")
         ax.grid(True, axis="y", linestyle="--", alpha=0.5)
+        ax.set_ylim(0, 1.05)
 
-        outpath = os.path.join(output_folder, f"bar_direction_{direction}.png")
-        plt.tight_layout()
-        fig.savefig(outpath, dpi=300)
-        plt.close()
-        print(f"Saved bar plot: {outpath}")
+    # Shared Y label
+    axes[0].set_ylabel("Probability of Perceiving Motion")
+    axes[0].legend(title="Temperature")
+
+    # Save combined figure
+    outpath = os.path.join(output_folder, "bar_combined.png")
+    plt.tight_layout()
+    fig.savefig(outpath, dpi=300)
+    plt.close()
+    print(f"Saved combined bar plot: {outpath}")
 
     # Save grouped table to Excel
     with pd.ExcelWriter(excel_file, mode="a", engine="openpyxl", if_sheet_exists="replace") as writer:
