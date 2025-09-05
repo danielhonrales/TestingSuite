@@ -101,9 +101,9 @@ def generate_graph(df, excel_file, output_folder):
 
     # Define colors/markers per Temperature
     temp_styles = {
-        -15: {"color": "blue", "marker": "o", "label": "Cold"},
-        0:  {"color": "gray", "marker": "o", "label": "No Thermal"},
-        9:  {"color": "red", "marker": "o", "label": "Hot"}
+        -15: {"color": "#4A5EEB", "marker": "o", "label": "Cold"},
+        0:  {"color": "#7A7A73", "marker": "o", "label": "Neutral"},
+        9:  {"color": "#F73F52", "marker": "o", "label": "Hot"}
     }
 
     # Define offsets for each temperature so points don't overlap on x-axis
@@ -171,6 +171,8 @@ def generate_graph(df, excel_file, output_folder):
         print(f"Saved plot: {outpath}")
 
     # === Combined subplot figure ===
+    plt.rcParams.update({'font.size': 14})  # sets global font size
+
     nrows = 1
     ncols = len(durations)
     fig, axes = plt.subplots(nrows, ncols, figsize=(5*ncols, 5), squeeze=False)
@@ -206,8 +208,6 @@ def generate_graph(df, excel_file, output_folder):
             )
 
         ax.set_title(title)
-        ax.set_xlabel("Intended Location (cm)")
-        ax.set_ylabel("Perceived Location (cm)")   # ✅ keep individual y-labels
         ax.set_xticks([0.0, 2.5, 5.0, 7.5, 10.0])
         ax.set_yticks([0.0, 2.5, 5.0, 7.5, 10.0])
         ax.set_xlim(-0.5, 10.5)
@@ -217,11 +217,15 @@ def generate_graph(df, excel_file, output_folder):
         if idx == 0:  # only put legend once
             ax.legend()
 
-    # Increase horizontal space so y-labels don’t overlap
-    plt.subplots_adjust(wspace=0.4)
+    # ✅ Add one shared axis label instead of per subplot
+    fig.text(0.5, 0.04, "Intended Location (cm)", ha="center")
+    fig.text(0.04, 0.5, "Perceived Location (cm)", va="center", rotation="vertical")
 
-    combined_path = os.path.join(output_folder, "scatter_combined.png")
-    plt.tight_layout()
+    # Increase horizontal space so y-labels don’t overlap
+    plt.subplots_adjust(wspace=0.3)
+
+    combined_path = os.path.join(output_folder, "study1_locations.png")
+    plt.tight_layout(rect=[0.05, 0.05, 1, 1])  # leave space for shared labels
     fig.savefig(combined_path, dpi=300, bbox_inches="tight")
     plt.close()
     print(f"Saved combined plot: {combined_path}")

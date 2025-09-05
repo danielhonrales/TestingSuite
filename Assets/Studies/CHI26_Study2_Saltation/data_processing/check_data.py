@@ -4,7 +4,7 @@ import itertools
 import os
 
 def main():
-    participants = [1,2,3,4,5,6,7,8,9,10,11,12,13,14]
+    participants = [1,2,3,4,5,7,8,9,10,11,12,13,14,15,16]
     parent_folder = 'Assets/Studies/CHI26_Study2_Saltation'
     input_folder = f'{parent_folder}/data_processing/analysis/{participant_string(participants)}'
     output_folder = f'{parent_folder}/data_processing/analysis/{participant_string(participants)}'
@@ -25,40 +25,36 @@ def main():
 def run_checks(df):
     results_normality = []
     results_homogeneity = []
-    location_cols = ["location1", "location2", "location3"]
 
     # === Normality check (Shapiro–Wilk per condition, per location col) ===
-    for loc_col in location_cols:
-        for (temp, dur, dir), subset in df.groupby(["Temperature", "Duration", "Direction"]):
-            if subset[loc_col].notna().sum() > 3:  # Shapiro needs at least 3 data points
-                stat, p = shapiro(subset[loc_col])
-                results_normality.append({
-                    "Measure": loc_col,
-                    "Temperature": temp,
-                    "Duration": dur,
-                    "Direction": dir,
-                    "Shapiro_W": stat,
-                    "p_value": p,
-                    "Normality_OK": 1 if p > 0.005 else 0
-                })
+    for (temp, dur, dir, loc), subset in df.groupby(["Temperature", "Duration", "Direction","Location"]):
+        stat, p = shapiro(subset["Displacement"])
+        results_normality.append({
+            "Temperature": temp,
+            "Duration": dur,
+            "Direction": dir,
+            "Location": loc,
+            "Shapiro_W": stat,
+            "p_value": p,
+            "Normality_OK": 1 if p > 0.005 else 0
+        })
 
     df_normality = pd.DataFrame(results_normality)
 
     # === Homogeneity of variances (Levene’s test across temperatures) ===
     # For each Duration × Direction × Measure
-    for loc_col in location_cols:
-        for (dur, dir), subset in df.groupby(["Duration", "Direction"]):
-            groups = [g[loc_col].dropna().values for _, g in subset.groupby("Temperature")]
-            if all(len(g) > 1 for g in groups):  # need at least 2 values per group
-                stat, p = levene(*groups)
-                results_homogeneity.append({
-                    "Measure": loc_col,
-                    "Duration": dur,
-                    "Direction": dir,
-                    "Levene_W": stat,
-                    "p_value": p,
-                    "Homoscedasticity_OK": 1 if p > 0.005 else 0
-                })
+    for (dur, dir, loc), subset in df.groupby(["Duration", "Direction", "Location"]):
+        groups = [g["Displacement"].dropna().values for _, g in subset.groupby("Temperature")]
+        if all(len(g) > 1 for g in groups):  # need at least 2 values per group
+            stat, p = levene(*groups)
+            results_homogeneity.append({
+                "Duration": dur,
+                "Direction": dir,
+                "Location": loc,
+                "Levene_W": stat,
+                "p_value": p,
+                "Homoscedasticity_OK": 1 if p > 0.005 else 0
+            })
 
     df_homogeneity = pd.DataFrame(results_homogeneity)
 

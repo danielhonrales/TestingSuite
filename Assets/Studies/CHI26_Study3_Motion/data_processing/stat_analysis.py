@@ -4,7 +4,7 @@ import numpy as np
 import os
 
 def main():
-    participants = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
+    participants = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
     parent_folder = 'Assets/Studies/CHI26_Study3_Motion'
     input_folder = f'{parent_folder}/data_processing/data'
     output_folder = f'{parent_folder}/data_processing/analysis/{participant_string(participants)}'
@@ -43,8 +43,8 @@ def perform_stat_analysis(df, participants, output_folder):
     df["DirectionMatch"] = (np.sign(df["Direction"]) == np.sign(df["FeltDirection"])).astype(int)
     print(f'Direction Match: {df["DirectionMatch"].sum()} / {df["DirectionMatch"].count()}, {df["DirectionMatch"].sum() / df["DirectionMatch"].count()}')
 
-    exclude_mask = (df["ThermalMatch"] == 0) & (df["DirectionMatch"] == 0)
-    df_filtered = df[~exclude_mask].copy()
+    include_mask = (df["ThermalMatch"] == 1) & (df["DirectionMatch"] == 1)
+    df_filtered = df[include_mask].copy()
 
     print(f'Valid Trials: {df_filtered["FeltMotion"].count()} / {df["FeltMotion"].count()}, {df_filtered["FeltMotion"].count() / df["FeltMotion"].count()}')
 

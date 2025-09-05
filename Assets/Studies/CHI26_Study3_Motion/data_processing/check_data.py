@@ -4,7 +4,7 @@ import itertools
 import os
 
 def main():
-    participants = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
+    participants = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
     parent_folder = 'Assets/Studies/CHI26_Study3_Motion'
     input_folder = f'{parent_folder}/data_processing/analysis/{participant_string(participants)}'
     output_folder = f'{parent_folder}/data_processing/analysis/{participant_string(participants)}'
@@ -21,6 +21,34 @@ def main():
 
     print(f"Normality results saved to {os.path.join(output_folder, 'normality_results.csv')}")
     print(f"Homogeneity results saved to {os.path.join(output_folder, 'homogeneity_results.csv')}")
+
+    participant_stats = descriptive_stats(df)
+    participant_stats = flag_outliers(participant_stats)
+    participant_stats.to_csv(os.path.join(output_folder, "participant_stats.csv"), index=False)
+    print(participant_stats)
+
+def descriptive_stats(df):
+    participant_stats = (
+        df.groupby(["Participant", "Temperature", "Duration", "Direction"])["FeltMotion"]
+        .agg(["mean", "std", "count"])
+        .reset_index()
+    )
+
+    return participant_stats
+
+def flag_outliers(stats):
+        # Z-score of participant means
+    mean_overall = stats["mean"].mean()
+    std_overall = stats["mean"].std()
+
+    stats["z_score"] = (
+        (stats["mean"] - mean_overall) / std_overall
+    )
+
+    # Mark as outlier if |z| > 3
+    stats["is_outlier"] = stats["z_score"].abs() > 2.5
+    return stats
+
 
 def run_checks(df):
     results_normality = []

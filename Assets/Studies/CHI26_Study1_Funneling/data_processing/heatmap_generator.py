@@ -11,7 +11,7 @@ from scipy.ndimage import gaussian_filter
 import random
 import os
 
-participants = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+participants = [16]
 temperatures = [9, -15]
 durations = [0.1, 1, 2]
 locations = [0, .25, .5, .75, 1]
@@ -182,10 +182,10 @@ def fill_red_circles(image_path, save_path=None):
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
     # Define red color range in HSV (two ranges for red wrap-around)
-    lower_red1 = np.array([0, 100, 100])
+    lower_red1 = np.array([0, 70, 50])
     upper_red1 = np.array([10, 255, 255])
 
-    lower_red2 = np.array([160, 100, 100])
+    lower_red2 = np.array([170, 70, 50])
     upper_red2 = np.array([180, 255, 255])
 
     # Create masks for red regions
@@ -197,12 +197,7 @@ def fill_red_circles(image_path, save_path=None):
     kernel = np.ones((3, 3), np.uint8)
     mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel, iterations=2)
 
-    # Find contours in red mask
-    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-    # Fill each red contour on original image
-    for cnt in contours:
-        cv2.drawContours(img, [cnt], -1, (0, 0, 255), thickness=cv2.FILLED)  # Red in BGR
+    img[mask > 0] = (0, 0, 255)
 
     # Save or return result
     if save_path:

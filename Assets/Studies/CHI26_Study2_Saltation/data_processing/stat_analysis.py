@@ -4,7 +4,7 @@ import numpy as np
 import os
 
 def main():
-    participants = [1,2,3,4,5,6,7,8,9,10,11,12,13]
+    participants = [1,2,3,4,5,7,8,9,10,11,12,13,14,15,16]
     parent_folder = 'Assets/Studies/CHI26_Study2_Saltation'
     input_folder = f'{parent_folder}/data_processing/data'
     output_folder = f'{parent_folder}/data_processing/analysis/{participant_string(participants)}'
@@ -44,9 +44,9 @@ def perform_stat_analysis(df, participants, output_folder):
     df["correctNum"] = df["numLocation"] == 3
     print(f'numLocation: {df["correctNum"].sum()} / {df["correctNum"].count()}, {df["correctNum"].sum() / df["correctNum"].count()}')
 
-    exclude_mask = (df["ThermalMatch"] == 1) & (df["correctNum"] == 1)
+    include_mask = (df["ThermalMatch"] == 1) & (df["correctNum"] == 1)
     #((df["Location"] == 0) & (df["FeltLocation"] > 0.5)) | ((df["Location"] == 1) & (df["FeltLocation"] < 0.5))
-    df_filtered = df[exclude_mask].copy()
+    df_filtered = df[include_mask].copy()
 
     df_filtered["Location1Error"] = np.where(
         df_filtered["Direction"] == 0,
