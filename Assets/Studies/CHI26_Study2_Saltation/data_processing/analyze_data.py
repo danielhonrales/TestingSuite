@@ -21,30 +21,35 @@ def process_participant_data(folder_path, participants, output_folder):
         if os.path.exists(filename):
             df = pd.read_excel(filename)
 
+            # Location correction to flip wrist - elbow
+            df["location1"] = 1 - df["location1"]
+            df["location2"] = 1 - df["location2"]
+            df["location3"] = 1 - df["location3"]
+
             df["Participant"] = p
             df["ThermalMatch"] = (np.sign(df["Temperature"]) == np.sign(df["FeltThermal"])).astype(int)
             df["NumMatch"] = (df["numLocation"] == 3).astype(int)
             df["DirectionMatch"] = np.where(
-                (df["Direction"] == 0) & (df["location1"] >= df["location2"]) & (df["location2"] >= df["location3"]),
+                (df["Direction"] == 1) & (df["location1"] >= df["location2"]) & (df["location2"] >= df["location3"]),
                 1,
                 np.where(
-                    (df["Direction"] == 1) & (df["location1"] <= df["location2"]) & (df["location2"] <= df["location3"]),
+                    (df["Direction"] == 0) & (df["location1"] <= df["location2"]) & (df["location2"] <= df["location3"]),
                     1,
                     0
                 )
             )
             df["Displacement1"] = np.where(
-                (df["Direction"] == 0),
+                (df["Direction"] == 1),
                 abs(1 - df["location1"]),
                 abs(0 - df["location1"])
             )
             df["Displacement2"] = np.where(
-                (df["Direction"] == 0),
+                (df["Direction"] == 1),
                 abs(1 - df["location2"]),
                 abs(0 - df["location2"])
             )
             df["Displacement3"] = np.where(
-                (df["Direction"] == 1),
+                (df["Direction"] == 0),
                 abs(1 - df["location3"]),
                 abs(0 - df["location3"])
             )
@@ -175,7 +180,7 @@ def generate_graph(df, excel_file, output_folder):
     df_flipped = df.copy()
 
     # Flip Direction = 0 so loc1=left(0), loc3=right(1)
-    mask = df_flipped["Direction"] == 0
+    mask = df_flipped["Direction"] == 1
     for col in ["location1", "location2", "location3"]:
         df_flipped.loc[mask, col] = 1 - df_flipped.loc[mask, col]
 

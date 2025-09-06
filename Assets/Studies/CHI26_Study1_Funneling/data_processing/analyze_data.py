@@ -36,6 +36,11 @@ def process_participant_data(folder_path, participants, output_folder):
 
             df["Participant"] = p
             df["ThermalMatch"] = (np.sign(df["Temperature"]) == np.sign(df["FeltThermal"])).astype(int)
+
+            # Location correction to flip wrist - elbow
+            df["Location"] = 1 - df["Location"]
+            df["FeltLocation"] = 1 - df["FeltLocation"]
+
             df["LocationError"] = df["Location"] - df["FeltLocation"]
 
             include_mask = df["ThermalMatch"] == 1 #& (df["LocationError"] <= 0.45)
