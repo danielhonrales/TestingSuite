@@ -38,7 +38,7 @@ def process_participant_data(folder_path, participants, output_folder):
             df["ThermalMatch"] = (np.sign(df["Temperature"]) == np.sign(df["FeltThermal"])).astype(int)
             df["LocationError"] = df["Location"] - df["FeltLocation"]
 
-            include_mask = df["ThermalMatch"] == 1 & (df["LocationError"] <= 0.45)
+            include_mask = df["ThermalMatch"] == 1 #& (df["LocationError"] <= 0.45)
             df_filtered = df[include_mask].copy()
 
             all_data.append(df)
@@ -121,7 +121,7 @@ def generate_graph(df, excel_file, output_folder):
     figs = []  # store individual figure paths
 
     # === Individual plots ===
-    for dur in durations:
+    """ for dur in durations:
         if dur == "all":
             data = grouped_all.copy()
             title = "All Durations"
@@ -147,11 +147,6 @@ def generate_graph(df, excel_file, output_folder):
                                 yerr=temp_data["FeltLocation_sem"],
                                 fmt=style["marker"], color=style["color"],
                                 capsize=4, markersize=8, label=style["label"])
-                """ # Add labels at shifted x too
-                for _, row in temp_data.iterrows():
-                    plt.text(row["Location"] + temp_offsets[temp], row["FeltLocation_mean"],
-                                f"{row['FeltLocation_mean']:.2f}",
-                                fontsize=8, ha="center", va="bottom") """
 
         plt.title(title)
         plt.xlabel("Intended Location")
@@ -168,7 +163,7 @@ def generate_graph(df, excel_file, output_folder):
         plt.savefig(outpath, dpi=300, bbox_inches="tight")
         plt.close()
         figs.append((title, outpath))
-        print(f"Saved plot: {outpath}")
+        print(f"Saved plot: {outpath}") """
 
     # === Combined subplot figure ===
     plt.rcParams.update({'font.size': 14})  # sets global font size
@@ -186,7 +181,7 @@ def generate_graph(df, excel_file, output_folder):
             title = "All Durations"
         else:
             data = grouped[grouped["Duration"] == dur].copy()
-            title = f"Duration = {dur}s"
+            title = f"Duration = {dur} s"
 
         # Clean NaNs
         data = data.dropna(subset=["FeltLocation_mean", "FeltLocation_sem"])
@@ -207,7 +202,7 @@ def generate_graph(df, excel_file, output_folder):
                 capsize=4, markersize=8, label=style["label"]
             )
 
-        ax.set_title(title)
+        ax.set_title(title, fontsize=18)
         ax.set_xticks([0.0, 2.5, 5.0, 7.5, 10.0])
         ax.set_yticks([0.0, 2.5, 5.0, 7.5, 10.0])
         ax.set_xlim(-0.5, 10.5)
@@ -218,8 +213,8 @@ def generate_graph(df, excel_file, output_folder):
             ax.legend()
 
     # ✅ Add one shared axis label instead of per subplot
-    fig.text(0.5, 0.04, "Intended Location (cm)", ha="center")
-    fig.text(0.04, 0.5, "Perceived Location (cm)", va="center", rotation="vertical")
+    fig.text(0.54, 0.04, "Intended Location (cm)", ha="center", fontsize=18)
+    fig.text(0.04, 0.5, "Perceived Location (cm)", va="center", rotation="vertical", fontsize=18)
 
     # Increase horizontal space so y-labels don’t overlap
     plt.subplots_adjust(wspace=0.3)

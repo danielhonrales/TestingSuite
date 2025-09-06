@@ -93,9 +93,9 @@ def generate_graph(df, excel_file, output_folder):
 
     # Colors for temperatures
     temp_colors = {
-        -15: {"color": "blue", "label": "Cold"},
-        0: {"color": "gray", "label": "Neutral"},
-        9: {"color": "red", "label": "Hot"}
+        -15: {"color": "#4A5EEB", "label": "Cold"},
+        0: {"color": "#7A7A73", "label": "Neutral"},
+        9: {"color": "#F73F52", "label": "Hot"}
     }
 
     # Unique values
@@ -152,7 +152,7 @@ def generate_graph(df, excel_file, output_folder):
     axes[0].legend(title="Temperature")
 
     # Save combined figure
-    outpath = os.path.join(output_folder, "bar_combined.png")
+    outpath = os.path.join(output_folder, "study3_probabilities.png")
     plt.tight_layout()
     fig.savefig(outpath, dpi=300)
     plt.close()

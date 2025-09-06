@@ -125,9 +125,9 @@ def generate_graph(df, excel_file, output_folder):
     )
 
     temp_styles = {
-        -15: {"color": "blue", "marker": "o", "label": "Cold"},
-        0:   {"color": "gray", "marker": "o", "label": "No Thermal"},
-        9:   {"color": "red", "marker": "o", "label": "Hot"}
+        -15: {"color": "#4A5EEB", "marker": "o", "label": "Cold"},
+        0:   {"color": "#7A7A73", "marker": "o", "label": "Neutral"},
+        9:   {"color": "#F73F52", "marker": "o", "label": "Hot"}
     }
 
     directions = sorted(grouped["Direction"].unique())

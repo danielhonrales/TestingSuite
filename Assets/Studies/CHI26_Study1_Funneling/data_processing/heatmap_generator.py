@@ -11,7 +11,7 @@ from scipy.ndimage import gaussian_filter
 import random
 import os
 
-participants = [16]
+participants = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
 temperatures = [9, -15]
 durations = [0.1, 1, 2]
 locations = [0, .25, .5, .75, 1]
@@ -79,7 +79,7 @@ def generate_heatmap(output_folder, trials_to_process, temperature, filename, lo
     for par in trials_to_process:
         par_folder = os.path.join(f"{parent_folder}/drawings/", f"p{par}")
         for trial in trials_to_process[par]:
-            filepath = os.path.join(par_folder, f"p{par}_trial{trial}_drawing.png")
+            filepath = os.path.join(par_folder, f"p{par}_trial{int(trial)}_drawing.png")
             heat_map = process_drawing(filepath, heat_map)
 
     sigma = 1
@@ -175,6 +175,7 @@ def process_drawing(filepath, heat_map):
     return heat_map  
 
 def fill_red_circles(image_path, save_path=None):
+    print("Processing " + image_path)
     # Read the image
     img = cv2.imread(image_path)
 
@@ -197,7 +198,16 @@ def fill_red_circles(image_path, save_path=None):
     kernel = np.ones((3, 3), np.uint8)
     mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel, iterations=2)
 
-    img[mask > 0] = (0, 0, 255)
+    # Optional: clean noise
+    kernel = np.ones((3, 3), np.uint8)
+    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel, iterations=2)
+
+    # Find contours in red mask
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # Fill each red contour on original image
+    for cnt in contours:
+        cv2.drawContours(img, [cnt], -1, (0, 0, 255), thickness=cv2.FILLED)  # Red in BGR
 
     # Save or return result
     if save_path:

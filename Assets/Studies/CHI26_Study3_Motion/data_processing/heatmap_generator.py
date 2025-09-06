@@ -80,7 +80,7 @@ def generate_heatmap(output_folder, trials_to_process, temperature, filename):
     for par in trials_to_process:
         par_folder = os.path.join(f"{parent_folder}/drawings/", f"p{par}")
         for trial in trials_to_process[par]:
-            filepath = os.path.join(par_folder, f"p{par}_trial{trial}_drawing.png")
+            filepath = os.path.join(par_folder, f"p{par}_trial{int(trial)}_drawing.png")
             heat_map = process_drawing(filepath, heat_map)
 
     # Shift
