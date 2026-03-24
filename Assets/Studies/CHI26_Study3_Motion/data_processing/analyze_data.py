@@ -93,10 +93,12 @@ def generate_graph(df, excel_file, output_folder):
 
     # Colors for temperatures
     temp_colors = {
-        -15: {"color": "#4A5EEB", "label": "Cold"},
-        0: {"color": "#7A7A73", "label": "Neutral"},
-        9: {"color": "#F73F52", "label": "Hot"}
+        -15: {"color": "#82AACC", "label": "Cold"},
+        0: {"color": "#C2C5C6", "label": "Neutral"},
+        9: {"color": "#DD617A", "label": "Hot"}
     }
+
+    plt.rcParams.update({'font.size': 14})
 
     # Unique values
     directions = sorted(df["Direction"].unique())
@@ -143,7 +145,7 @@ def generate_graph(df, excel_file, output_folder):
         ax.set_xticks(x)
         ax.set_xticklabels([str(d) + " s" for d in durations])
         ax.set_xlabel("Duration")
-        ax.set_title(f"{'Elbow-To-Wrist' if direction == 0 else 'Wrist-To-Elbow'}")
+        ax.set_title(f"{'(a) Elbow-To-Wrist' if direction == 0 else '(b) Wrist-To-Elbow'}")
         ax.grid(True, axis="y", linestyle="--", alpha=0.5)
         ax.set_ylim(0, 1.05)
 

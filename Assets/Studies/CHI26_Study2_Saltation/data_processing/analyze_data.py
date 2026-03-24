@@ -112,6 +112,12 @@ def generate_graph(df, excel_file, output_folder):
     plus combined-direction graphs (with Direction=0 flipped).
     """
     df = df[(df["ThermalMatch"] == 1) & (df["NumMatch"] == 1)]
+    df['location1'] *= 10
+    df['location2'] *= 10
+    df['location3'] *= 10
+    df['Displacement1'] *= 10
+    df['Displacement2'] *= 10
+    df['Displacement3'] *= 10
 
     # ---------- Per-direction graphs ----------
     long_df = df.melt(
@@ -132,7 +138,13 @@ def generate_graph(df, excel_file, output_folder):
     temp_styles = {
         -15: {"color": "#4A5EEB", "marker": "o", "label": "Cold"},
         0:   {"color": "#7A7A73", "marker": "o", "label": "Neutral"},
-        9:   {"color": "#F73F52", "marker": "o", "label": "Hot"}
+        9:   {"color": "#F73F52", "marker": "o", "label": "Hot"},
+    }
+
+    temp_offsets = {
+        -15: -0.02,   # Cold (shift left)
+        0:    0.0,    # No Thermal (centered)
+        9:   +0.02    # Hot (shift right)
     }
 
     directions = sorted(grouped["Direction"].unique())
@@ -161,9 +173,9 @@ def generate_graph(df, excel_file, output_folder):
                              fmt=style["marker"], color=style["color"],
                              capsize=4, markersize=8, label=style["label"])
 
-            plt.title(f"Direction = {d}, Duration = {dur}s")
-            plt.xlabel("Location")
-            plt.ylabel("Average Location Value")
+            plt.title("Elbow-to-Wrist" if d == 0 else "Wrist-to-Elbow" f"Direction = {d}, Duration = {dur}s")
+            plt.xlabel("Pulse Order")
+            plt.ylabel("Perceived Location (cm)")
             plt.ylim(-0.05, 1.05)
             plt.legend()
             plt.grid(True, linestyle="--", alpha=0.5)
@@ -175,100 +187,154 @@ def generate_graph(df, excel_file, output_folder):
 
             subplot_data.append(("dir", d, dur, subset))
 
+    plt.rcParams.update({'font.size': 12})  # sets global font size
 
-    # ---------- Combined-direction graphs ----------
-    df_flipped = df.copy()
+    # ---------- Master figure: per-direction only ----------
+    dir_plots = [p for p in subplot_data if p[0] == "dir"]
+    if dir_plots:
+        durations_in_dir = sorted(set(p[2] for p in dir_plots))
+        directions_in_dir = sorted(set(p[1] for p in dir_plots))
 
-    # Flip Direction = 0 so loc1=left(0), loc3=right(1)
-    mask = df_flipped["Direction"] == 1
-    for col in ["location1", "location2", "location3"]:
-        df_flipped.loc[mask, col] = 1 - df_flipped.loc[mask, col]
+        nrows = len(directions_in_dir)
+        ncols = len(durations_in_dir)
+        fig, axes = plt.subplots(nrows, ncols, figsize=(4*ncols, 4*nrows), squeeze=False)
 
-    long_df_comb = df_flipped.melt(
-        id_vars=["Duration", "Temperature"],
-        value_vars=["location1", "location2", "location3"],
-        var_name="LocationType",
-        value_name="LocationValue"
+        # direction labels for rows
+        dir_labels = {0: "Elbow\n-to-\nWrist", 1: "Wrist\n-to-\nElbow"}
+
+        for (ptype, d, dur, subset) in dir_plots:
+            row = directions_in_dir.index(d)
+            col = durations_in_dir.index(dur)
+            ax = axes[row, col]
+
+            for temp, style in temp_styles.items():
+                temp_data = subset[subset["Temperature"] == temp]
+                if temp_data.empty:
+                    continue
+                temp_data = temp_data.sort_values("LocationType")
+
+                # ✅ map x-axis tick labels to P1, P2, P3
+                base_x = np.arange(1, len(temp_data) + 1)   # [1,2,3] for P1,P2,P3
+                x_vals = base_x + temp_offsets[temp] 
+                ax.errorbar(x_vals, temp_data["Location_mean"],
+                            yerr=temp_data["Location_sem"],
+                            fmt=style["marker"], color=style["color"],
+                            capsize=4, markersize=6,
+                            label=style["label"], linestyle="none")
+
+            ax.set_title(f"{'Elbow-to-Wrist' if d == 0 else 'Wrist-to-Elbow'}, {dur} s")
+            ax.set_ylim(-0.05, 1.05)
+            ax.grid(True, linestyle="--", alpha=0.5)
+            ax.set_xticks([1, 2, 3])
+            ax.set_xticklabels(["P1", "P2", "P3"])
+            ax.set_yticks([0.0, 2.5, 5.0, 7.5, 10.0])
+
+            # ✅ Show y-axis label + ticks only for first column
+            if col == 0:
+                ax.set_ylabel("Perceived Location (cm)")
+            else:
+                ax.set_ylabel("")
+                ax.set_yticklabels([])
+
+            # ✅ Show x-axis label only for bottom row
+            if row == nrows - 1:
+                ax.set_xlabel("Pulse Order")
+            else:
+                ax.set_xlabel("")
+
+        """ # Add row labels inside, anchored to first column axes
+        for row, d in enumerate(directions_in_dir):
+            ax = axes[row, 0]  # first column axis of this row
+            ax.annotate(dir_labels[d],
+                        xy=(0, 0.5), xycoords='axes fraction',   # middle of y-axis
+                        xytext=(-100, 0), textcoords='offset points',  # shift left
+                        va='center', ha='center', rotation='horizontal',
+                        fontsize=14, fontweight="bold") """
+
+        # Shared legend in top-left of the first subplot
+        handles, labels = axes[0, 0].get_legend_handles_labels()
+        axes[0, 0].legend(handles, labels, loc="upper left", frameon=True)
+
+        fig.tight_layout(rect=[0, 0, 1, 1])
+
+        outpath = os.path.join(output_folder, "study2_locations.png")
+        fig.savefig(outpath, dpi=300)
+        plt.close(fig)
+        print(f"Saved direction-only grid: {outpath}")
+
+    # ---------- Master figure: combined-direction only (Displacement) ----------
+    # Prepare displacement data separately
+    disp_long_df = df.melt(
+        id_vars=["Direction", "Duration", "Temperature"],
+        value_vars=["Displacement1", "Displacement2", "Displacement3"],
+        var_name="DisplacementType",
+        value_name="DisplacementValue"
     )
 
-    grouped_comb = (
-        long_df_comb.groupby(["Duration", "Temperature", "LocationType"])
-                    .agg(Location_mean=("LocationValue", "mean"),
-                         Location_sem=("LocationValue",
-                                       lambda x: 0 if len(x) <= 1 else x.std(ddof=1)/np.sqrt(len(x))))
+    disp_grouped = (
+        disp_long_df.groupby(["Duration", "Temperature", "DisplacementType"])
+                    .agg(Disp_mean=("DisplacementValue", "mean"),
+                         Disp_sem=("DisplacementValue",
+                                   lambda x: 0 if len(x) <= 1 else x.std(ddof=1)/np.sqrt(len(x))))
                     .reset_index()
     )
 
-    for dur in durations:
-        subset = grouped_comb[grouped_comb["Duration"] == dur]
-        if subset.empty:
-            continue
+    # Filter to only durations available
+    durations_in_comb = sorted(disp_grouped["Duration"].unique())
+    ncols = len(durations_in_comb)
+    nrows = 1
 
-        plt.figure(figsize=(6,5))
+    fig, axes = plt.subplots(nrows, ncols, figsize=(4*ncols, 4), squeeze=False)
+
+    for col, dur in enumerate(durations_in_comb):
+        ax = axes[0, col]
+        subset = disp_grouped[disp_grouped["Duration"] == dur]
+
         for temp, style in temp_styles.items():
             temp_data = subset[subset["Temperature"] == temp]
             if temp_data.empty:
                 continue
-            temp_data = temp_data.sort_values("LocationType")
-            x_vals = temp_data["LocationType"]
-            y_vals = temp_data["Location_mean"]
-            y_errs = temp_data["Location_sem"]
 
-            plt.errorbar(x_vals, y_vals, yerr=y_errs,
-                         fmt=style["marker"], color=style["color"],
-                         capsize=4, markersize=8, label=style["label"])
-
-        plt.title(f"Combined Directions, Duration = {dur}s")
-        plt.xlabel("Location (normalized left→right)")
-        plt.ylabel("Average Location Value")
-        plt.ylim(-0.05, 1.05)
-        plt.legend()
-        plt.grid(True, linestyle="--", alpha=0.5)
-
-        outpath = os.path.join(output_folder, f"scatter_combined_dur{dur}.png")
-        plt.savefig(outpath, dpi=300, bbox_inches="tight")
-        plt.close()
-        print(f"Saved combined plot: {outpath}")
-
-        subplot_data.append(("combined", None, dur, subset))
-
-    # ---------- Master figure with all subplots ----------
-    nplots = len(subplot_data)
-    ncols = 3
-    nrows = int(np.ceil(nplots / ncols))
-    fig, axes = plt.subplots(nrows, ncols, figsize=(6*ncols, 5*nrows), squeeze=False)
-
-    for idx, (ptype, d, dur, subset) in enumerate(subplot_data):
-        ax = axes[idx // ncols, idx % ncols]
-        for temp, style in temp_styles.items():
-            temp_data = subset[subset["Temperature"] == temp]
-            if temp_data.empty:
-                continue
-            temp_data = temp_data.sort_values("LocationType")
-            ax.errorbar(temp_data["LocationType"], temp_data["Location_mean"],
-                        yerr=temp_data["Location_sem"],
+            # map x-axis to P1, P2, P3
+            x_vals = ["P1", "P2", "P3"]
+            x_vals = base_x + temp_offsets[temp] 
+            ax.errorbar(x_vals, temp_data["Disp_mean"], 
+                        yerr=temp_data["Disp_sem"],
                         fmt=style["marker"], color=style["color"],
                         capsize=4, markersize=6, label=style["label"], linestyle="none")
 
-        if ptype == "dir":
-            ax.set_title(f"Dir={d}, Dur={dur}s")
-            ax.set_xlabel("Location")
+        ax.set_title(f"{dur} s")
+        ax.set_xlabel("Pulse Order")
+
+        # ✅ Only first column gets y-axis label
+        if col == 0:
+            ax.set_ylabel("Absolute Displacement (cm)")
         else:
-            ax.set_title(f"Combined, Dur={dur}s")
-            ax.set_xlabel("Location (normalized left→right)")
+            ax.set_ylabel("")
+            ax.set_yticklabels([])
 
-        ax.set_ylabel("Avg Location Value")
-        ax.set_ylim(-0.05, 1.05)
+        ax.set_ylim(-0.05, 0.55)
         ax.grid(True, linestyle="--", alpha=0.5)
+        ax.set_xticks([1, 2, 3])
+        ax.set_xticklabels(["P1", "P2", "P3"])
+        ax.set_yticks([0.0, 2.5, 5.0, 7.5, 10.0])
+        
+        # ✅ Show x-axis label only for bottom row
+        if col == 1:
+            ax.set_xlabel("Pulse Order")
+        else:
+            ax.set_xlabel("")
 
-    handles, labels = ax.get_legend_handles_labels()
-    fig.legend(handles, labels, loc="upper right")
-    fig.tight_layout(rect=[0, 0, 0.9, 1])
+    # Shared legend in top-left of first subplot
+    handles, labels = axes[0, 0].get_legend_handles_labels()
+    axes[0, 0].legend(handles, labels, loc="upper left", frameon=True)
 
-    outpath = os.path.join(output_folder, "all_plots_grid.png")
+    fig.tight_layout()
+
+    outpath = os.path.join(output_folder, "study2_displacement.png")
     fig.savefig(outpath, dpi=300)
     plt.close(fig)
-    print(f"Saved master grid: {outpath}")
+    print(f"Saved combined-displacement grid: {outpath}")
 
 def participant_string(participants):
     """

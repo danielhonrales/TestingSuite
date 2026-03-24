@@ -112,7 +112,7 @@ def generate_heatmap(output_folder, trials_to_process, temperature, filename):
     circle_color = 'gray'
     ax = plt.gca()
     for (x, y) in circle_coords:
-        circ = Circle((x, y), radius=circle_radius, color=circle_color, alpha=0.8)
+        circ = Circle((x, y), radius=circle_radius, edgecolor='gray', facecolor='none', alpha=0.8, linewidth=2)
         ax.add_patch(circ)
 
     # Rectangle center coordinates
@@ -122,17 +122,55 @@ def generate_heatmap(output_folder, trials_to_process, temperature, filename):
     x0 = rect_center[0] - rect_width / 2
     y0 = rect_center[1] - rect_height / 2
     rect = Rectangle((x0, y0), rect_width, rect_height,
-                    linewidth=1.5, edgecolor='gray', facecolor='gray', alpha=0.8)
+                    linewidth=2, edgecolor='gray', facecolor='none', alpha=0.8)
     ax.add_patch(rect)
-
+# === Save temp file first ===
     file_path = os.path.join(output_folder, filename)
-    plt.savefig(file_path, dpi=300, bbox_inches='tight')
+    temp_path = file_path.replace(".png", "_raw.png")
+    plt.savefig(temp_path, dpi=300, bbox_inches='tight')
+    plt.close()
+
+    # === Crop with Pillow ===
+    crop_box = (300, 275, 1300, 775)  # (left, upper, right, lower)
+    img = Image.open(temp_path)
+    cropped_img = img.crop(crop_box)
+
+    transparent_img = make_border_white_transparent(cropped_img)
+    transparent_img.save(file_path)
+
+    # Remove temp file (optional)
+    os.remove(temp_path)
+
     print(f"Saved to {file_path} with {sum(len(par) for par in trials_to_process.values())} files processed")
     for par in trials_to_process:
         print(f"\t{par}: {trials_to_process[par]}")
 
     plt.close()
 
+def make_border_white_transparent(img, margin=150, white_thresh=250):
+    """
+    Turns white pixels transparent only within `margin` pixels from the border.
+    """
+    img = img.convert("RGBA")
+    width, height = img.size
+    datas = img.getdata()
+
+    new_data = []
+    for i, item in enumerate(datas):
+        x = i % width
+        y = i // width
+
+        # Check if pixel is near the border
+        near_border = (x < margin or x >= width - margin or 
+                       y < margin or y >= height - margin)
+
+        if near_border and item[0] > white_thresh and item[1] > white_thresh and item[2] > white_thresh:
+            new_data.append((255, 255, 255, 0))  # transparent
+        else:
+            new_data.append(item)
+
+    img.putdata(new_data)
+    return img
 
 def process_drawing(filepath, heat_map):
     if os.path.isfile(filepath):

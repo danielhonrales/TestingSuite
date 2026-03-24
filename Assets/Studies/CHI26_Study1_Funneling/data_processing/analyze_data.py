@@ -186,7 +186,7 @@ def generate_graph(df, excel_file, output_folder):
             title = "All Durations"
         else:
             data = grouped[grouped["Duration"] == dur].copy()
-            title = f"Duration = {dur} s"
+            title = f"{dur} s"
 
         # Clean NaNs
         data = data.dropna(subset=["FeltLocation_mean", "FeltLocation_sem"])
@@ -218,7 +218,9 @@ def generate_graph(df, excel_file, output_folder):
             ax.legend()
 
     # ✅ Add one shared axis label instead of per subplot
-    fig.text(0.54, 0.04, "Intended Location (cm)", ha="center", fontsize=18)
+    fig.text(0.54, 0.04, "Target Location (cm)", ha="center", fontsize=18)
+    fig.text(0.228, 0.04, "Target Location (cm)", ha="center", fontsize=18)
+    fig.text(0.851, 0.04, "Target Location (cm)", ha="center", fontsize=18)
     fig.text(0.04, 0.5, "Perceived Location (cm)", va="center", rotation="vertical", fontsize=18)
 
     # Increase horizontal space so y-labels don’t overlap

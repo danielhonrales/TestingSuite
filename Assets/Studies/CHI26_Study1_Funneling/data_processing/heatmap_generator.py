@@ -11,7 +11,7 @@ from scipy.ndimage import gaussian_filter
 import random
 import os
 
-participants = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+participants = [2]
 temperatures = [9, -15]
 durations = [0.1, 1, 2]
 locations = [0, .25, .5, .75, 1]
@@ -96,22 +96,30 @@ def generate_heatmap(output_folder, trials_to_process, temperature, filename, lo
     ax = plt.gca()
     circle_coords = [(330, 155), (190, 155)]
     for (x, y) in circle_coords:
-        circ = Circle((x, y), radius=8, color='gray', alpha=0.8)
+        circ = Circle((x, y), radius=8, edgecolor='gray', facecolor='none', alpha=0.8, linewidth=2)
         ax.add_patch(circ)
 
     rect_center = (106, 155)
     rect = Rectangle(
         (rect_center[0] - 7.5, rect_center[1] - 7.5),
         15, 15,
-        linewidth=1.5, edgecolor='gray', facecolor='gray', alpha=0.8
+        linewidth=2, edgecolor='gray', facecolor='none', alpha=0.8
     )
     ax.add_patch(rect)
 
-    circle_coords = (330 + ((190 - 330) * location), 155)
+    rect_center = (330 + ((190 - 330) * location), 155)
+    rect = Rectangle(
+        (rect_center[0], 0),
+        2, 300,
+        facecolor='red' if temperature > 0 else 'blue', alpha=0.8
+    )
+    ax.add_patch(rect)
+
+    """ circle_coords = (330 + ((190 - 330) * location), 155)
     circ = Circle(circle_coords, radius=5,
-                  facecolor='red' if temperature > 0 else 'blue',
-                  edgecolor='black', alpha=0.8, linewidth=1)
-    ax.add_patch(circ)
+                  facecolor='none',
+                  edgecolor='red' if temperature > 0 else 'blue', alpha=0.8, linewidth=1)
+    ax.add_patch(circ) """
 
     # === Save temp file first ===
     file_path = os.path.join(output_folder, filename)
