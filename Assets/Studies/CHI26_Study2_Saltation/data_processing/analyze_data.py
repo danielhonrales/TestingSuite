@@ -54,7 +54,7 @@ def process_participant_data(folder_path, participants, output_folder):
                 abs(0 - df["location3"])
             )
             
-            include_mask = (df["ThermalMatch"] == 1) & (df["NumMatch"] == 1) & df["DirectionMatch"] == 1
+            include_mask = (df["ThermalMatch"] == 1) & (df["NumMatch"] == 1) #& df["DirectionMatch"] == 1
             df_filtered = df[include_mask].copy()
 
             all_data.append(df)
