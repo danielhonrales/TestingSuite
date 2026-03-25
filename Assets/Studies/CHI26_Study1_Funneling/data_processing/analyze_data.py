@@ -171,7 +171,7 @@ def generate_graph(df, excel_file, output_folder):
         print(f"Saved plot: {outpath}") """
 
     # === Combined subplot figure ===
-    plt.rcParams.update({'font.size': 14})  # sets global font size
+    plt.rcParams.update({'font.size': 22})  # sets global font size
 
     nrows = 1
     ncols = len(durations)
@@ -207,21 +207,25 @@ def generate_graph(df, excel_file, output_folder):
                 capsize=4, markersize=8, label=style["label"]
             )
 
-        ax.set_title(title, fontsize=18)
+        if idx == 0:  # only put legend once
+            plt.rcParams.update({'font.size': 20})
+            ax.legend()
+            plt.rcParams.update({'font.size': 22})
+
+        ax.set_title(title, fontsize=28)
         ax.set_xticks([0.0, 2.5, 5.0, 7.5, 10.0])
         ax.set_yticks([0.0, 2.5, 5.0, 7.5, 10.0])
         ax.set_xlim(-0.5, 10.5)
         ax.set_ylim(-0.5, 10.5)
-        ax.grid(True, linestyle="--", alpha=0.5)
+        ax.grid(True, linestyle="--", alpha=1.0)
 
-        if idx == 0:  # only put legend once
-            ax.legend()
+        
 
     # ✅ Add one shared axis label instead of per subplot
-    fig.text(0.54, 0.04, "Target Location (cm)", ha="center", fontsize=18)
-    fig.text(0.228, 0.04, "Target Location (cm)", ha="center", fontsize=18)
-    fig.text(0.851, 0.04, "Target Location (cm)", ha="center", fontsize=18)
-    fig.text(0.04, 0.5, "Perceived Location (cm)", va="center", rotation="vertical", fontsize=18)
+    #fig.text(0.228, 0.00, "Target Location (cm)", ha="center", fontsize=20)
+    fig.text(0.54, 0.00, "Target Location (cm)", ha="center", fontsize=28)
+    #fig.text(0.851, 0.02, "Target Location (cm)", ha="center", fontsize=20)
+    fig.text(0.04, 0.5, "Perceived Location (cm)", va="center", rotation="vertical", fontsize=28)
 
     # Increase horizontal space so y-labels don’t overlap
     plt.subplots_adjust(wspace=0.3)

@@ -75,47 +75,55 @@ def process_participant_data(folder_path, participants, output_folder):
 def generate_graph(df, excel_file, output_folder):
     """
     Creates bar graphs of FeltMotion probability (mean),
-    grouped by Temperature × Duration, one plot per Direction.
+    grouped by Temperature x Duration, one plot per Direction.
     Only includes rows where ThermalMatch == 1 and DirectionMatch == 1.
     """
-    # ✅ Keep only trials where both matches == 1
-    # Filter data
     df = df[(df["ThermalMatch"] == 1) & (df["DirectionMatch"] == 1)]
 
-    # Compute mean + SEM of FeltMotion
     grouped = (
         df.groupby(["Direction", "Temperature", "Duration"])
         .agg(FeltMotion_mean=("FeltMotion", "mean"),
-            FeltMotion_sem=("FeltMotion",
-                            lambda x: 0 if len(x) <= 1 else x.std(ddof=1) / np.sqrt(len(x))))
+             FeltMotion_sem=("FeltMotion",
+                             lambda x: 0 if len(x) <= 1 else x.std(ddof=1) / np.sqrt(len(x))))
         .reset_index()
     )
 
-    # Colors for temperatures
     temp_colors = {
         -15: {"color": "#82AACC", "label": "Cold"},
-        0: {"color": "#C2C5C6", "label": "Neutral"},
-        9: {"color": "#DD617A", "label": "Hot"}
+        0:   {"color": "#C2C5C6", "label": "Neutral"},
+        9:   {"color": "#DD617A", "label": "Hot"}
     }
 
-    plt.rcParams.update({'font.size': 14})
+    FONT_SIZE    = 20
+    TITLE_SIZE   = 22
+    BAR_WIDTH    = 0.18   # ← width of each individual bar (reduce to shrink bars)
+    BAR_SPACING  = 0.05   # ← gap between bars within a group
 
-    # Unique values
-    directions = sorted(df["Direction"].unique())
-    durations = sorted(df["Duration"].unique())
+    plt.rcParams.update({
+        'font.size':         FONT_SIZE,
+        'axes.titlesize':    TITLE_SIZE,
+        'axes.labelsize':    FONT_SIZE,
+        'xtick.labelsize':   FONT_SIZE,
+        'ytick.labelsize':   FONT_SIZE,
+        'legend.fontsize':   FONT_SIZE - 2,
+        'axes.linewidth':    2.0,
+        'xtick.major.width': 2.0,
+        'ytick.major.width': 2.0,
+    })
+
+    directions   = sorted(df["Direction"].unique())
+    durations    = sorted(df["Duration"].unique())
     temperatures = sorted(df["Temperature"].unique())
 
     os.makedirs(output_folder, exist_ok=True)
 
-    # === Create one figure with subplots ===
-    fig, axes = plt.subplots(1, len(directions), figsize=(8*len(directions), 6), sharey=True)
+    # Smaller per-subplot width so figure fits in paper
+    fig, axes = plt.subplots(1, len(directions), figsize=(5 * len(directions), 5), sharey=True)
 
     if len(directions) == 1:
-        axes = [axes]  # make iterable if only one direction
+        axes = [axes]
 
-    x = np.arange(len(durations))  # X positions: durations
-    width = 0.7 / len(temperatures)   # bar width
-    spacing = 0.1
+    x = np.arange(len(durations))
 
     for ax, direction in zip(axes, directions):
         data_dir = grouped[grouped["Direction"] == direction]
@@ -133,34 +141,35 @@ def generate_graph(df, excel_file, output_folder):
                     means.append(np.nan)
                     sems.append(0)
 
-            # Center bars around each duration
-            positions = (
-                x + (i - (len(temperatures)-1)/2) * (width + spacing/len(temperatures))
-            )
+            # Center bars around each duration tick
+            offset = (i - (len(temperatures) - 1) / 2) * (BAR_WIDTH + BAR_SPACING)
+            positions = x + offset
 
-            ax.bar(positions, means, width, yerr=sems,
-                color=temp_colors[temp]["color"],
-                capsize=4, label=f"{temp_colors[temp]['label']}")
+            ax.bar(positions, means, BAR_WIDTH,
+                   yerr=sems,
+                   color=temp_colors[temp]["color"],
+                   capsize=4,
+                   label=temp_colors[temp]["label"])
 
         ax.set_xticks(x)
         ax.set_xticklabels([str(d) + " s" for d in durations])
         ax.set_xlabel("Duration")
-        ax.set_title(f"{'(a) Elbow-To-Wrist' if direction == 0 else '(b) Wrist-To-Elbow'}")
+        ax.set_title(f"{'Elbow-To-Wrist' if direction == 0 else 'Wrist-To-Elbow'}")
         ax.grid(True, axis="y", linestyle="--", alpha=0.5)
         ax.set_ylim(0, 1.05)
 
-    # Shared Y label
-    axes[0].set_ylabel("Probability of Perceiving Motion")
+        # Set x limits tight around the bars
+        ax.set_xlim(-0.5, len(durations) - 0.5)
+
+    axes[0].set_ylabel("Probability of Motion")
     axes[0].legend(title="Temperature")
 
-    # Save combined figure
     outpath = os.path.join(output_folder, "study3_probabilities.png")
     plt.tight_layout()
-    fig.savefig(outpath, dpi=300)
+    fig.savefig(outpath, dpi=300, bbox_inches="tight")
     plt.close()
     print(f"Saved combined bar plot: {outpath}")
 
-    # Save grouped table to Excel
     with pd.ExcelWriter(excel_file, mode="a", engine="openpyxl", if_sheet_exists="replace") as writer:
         grouped.to_excel(writer, sheet_name="FeltMotion_Prob", index=False)
     print(f"Saved FeltMotion probability table into {excel_file}")
